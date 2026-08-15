@@ -349,7 +349,18 @@
     display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);
   }
   .lib-row:last-child{border-bottom:none;}
-  .lib-row .txt{flex:1;font-size:14px;color:var(--ink);}
+  .lib-row .txt{flex:1;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lib-row-phrase .txt{white-space:normal;}
+  .phrase-title-lbl{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .phrase-full-txt{font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .add-phrase-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;margin-bottom:14px;}
+  .add-phrase-form .field{margin-bottom:8px;}
+  .add-phrase-form .field:last-of-type{margin-bottom:10px;}
+  .drag-handle{flex:0 0 auto;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--faint);touch-action:none;cursor:grab;}
+  .lib-row.dragging{position:relative;z-index:50;background:var(--surface-alt);box-shadow:0 8px 20px rgba(28,43,51,0.16);border-radius:var(--radius-sm);}
+  .theme-swatches{display:flex;gap:14px;margin-bottom:20px;}
+  .theme-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;padding:0;cursor:pointer;}
+  .theme-swatch.active{border-color:var(--surface);box-shadow:0 0 0 2px var(--ink);}
   .lib-row button{background:none;border:none;padding:4px;cursor:pointer;}
   .lib-row button svg{width:17px;height:17px;stroke:var(--faint);}
   .add-row{display:flex;gap:8px;margin-bottom:14px;}
@@ -463,29 +474,66 @@
     ],
     phrases: {
       "Summary": [
-        "Client was available and engaged throughout the visit.",
-        "Visit was brief; client had limited availability.",
-        "Client was not present; spoke with a household or site contact instead."
+        {title:"Engaged & available", phrase:"Client was available and engaged throughout the visit."},
+        {title:"Brief visit", phrase:"Visit was brief; client had limited availability."},
+        {title:"Client not present", phrase:"Client was not present; spoke with a household or site contact instead."},
+        {title:"First visit", phrase:"First visit with this client — spent time on introductions and orientation."},
+        {title:"Rescheduled partway", phrase:"Visit had to be rescheduled partway through."},
+        {title:"Distracted / preoccupied", phrase:"Client seemed distracted or preoccupied during the visit."},
+        {title:"Family present", phrase:"A family member or caregiver was present for part of the visit."}
       ],
       "Findings": [
-        "No issues or concerns were reported.",
-        "Client raised a question that needs follow-up.",
-        "Noticed an item that needs attention before the next visit."
+        {title:"Nothing to report", phrase:"No issues or concerns were reported."},
+        {title:"Open question", phrase:"Client raised a question that needs follow-up."},
+        {title:"Needs attention", phrase:"Noticed an item that needs attention before the next visit."},
+        {title:"Something's changed", phrase:"Client mentioned a change since the last visit."},
+        {title:"Visit cut short", phrase:"Something prevented part of the visit from being completed as planned."},
+        {title:"New concern raised", phrase:"Client raised a new concern that hasn't come up before."},
+        {title:"Everything on track", phrase:"Everything discussed matched what was expected for this visit."}
       ],
       "Next steps": [
-        "No further action needed at this time.",
-        "Discussed timeline for the next visit.",
-        "Client requested a follow-up call this week."
+        {title:"No action needed", phrase:"No further action needed at this time."},
+        {title:"Discussed timeline", phrase:"Discussed timeline for the next visit."},
+        {title:"Call requested", phrase:"Client requested a follow-up call this week."},
+        {title:"Flagged to supervisor", phrase:"Flagged this for a supervisor or teammate to follow up on."},
+        {title:"More frequent visits", phrase:"Increased visit frequency going forward."},
+        {title:"Sent info/resources", phrase:"Followed up by sending information or resources after the visit."},
+        {title:"Confirmed next visit", phrase:"Confirmed the date and time of the next visit."}
       ]
     }
   };
+
+  var THEMES = {
+    teal:   { bg:"#EDEFF1", surface:"#FFFFFF", "surface-alt":"#F1F4F4", border:"#E2E6E8", ink:"#1C2B33", muted:"#6E7A82", faint:"#9AA5AB", primary:"#0F6B64", "primary-dark":"#0A4F4B", "primary-soft":"#E3F1EF", amber:"#E8A33D", "amber-soft":"#FCF1DC", sage:"#4F8A6D", "sage-soft":"#E7F1EC", danger:"#C4573F", "danger-soft":"#F7E9E5" },
+    slate:  { bg:"#EEF1F5", surface:"#FFFFFF", "surface-alt":"#F2F4F7", border:"#E1E6EC", ink:"#1E2A38", muted:"#6B7A8C", faint:"#9FADBC", primary:"#2C5C8A", "primary-dark":"#1F4467", "primary-soft":"#E4EDF6", amber:"#E0973B", "amber-soft":"#FBF0DC", sage:"#4C8B72", "sage-soft":"#E5F1EC", danger:"#C1543F", "danger-soft":"#F6E8E4" },
+    forest: { bg:"#EEF1EC", surface:"#FFFFFF", "surface-alt":"#F2F5F0", border:"#E0E6DD", ink:"#232B22", muted:"#6B7768", faint:"#9CA896", primary:"#3F6B45", "primary-dark":"#2C4E30", "primary-soft":"#E5EFE3", amber:"#C98A34", "amber-soft":"#F7EAD4", sage:"#5C8F5E", "sage-soft":"#E7F1E5", danger:"#B5533D", "danger-soft":"#F3E4DE" },
+    plum:   { bg:"#F1EEF2", surface:"#FFFFFF", "surface-alt":"#F5F1F5", border:"#E6E0E7", ink:"#2A2331", muted:"#79697F", faint:"#AA9BB0", primary:"#6D4879", "primary-dark":"#50345A", "primary-soft":"#EFE4F1", amber:"#CC8F3E", "amber-soft":"#F8EDDA", sage:"#57876B", "sage-soft":"#E5F0E9", danger:"#B5533F", "danger-soft":"#F3E2DE" },
+    dark:   { bg:"#14181A", surface:"#1D2225", "surface-alt":"#242A2D", border:"#323A3E", ink:"#EDEFEF", muted:"#9AA5A8", faint:"#6B7679", primary:"#3FA69B", "primary-dark":"#2C7A72", "primary-soft":"#1E3634", amber:"#E8A33D", "amber-soft":"#3A2E17", sage:"#63AC85", "sage-soft":"#1E332A", danger:"#E27C63", "danger-soft":"#3A241E" }
+  };
+  var THEME_ORDER = ["teal","slate","forest","plum","dark"];
+  var THEME_LABELS = { teal:"Teal", slate:"Slate Blue", forest:"Forest", plum:"Plum", dark:"Dark" };
+
+  function getSavedTheme(){
+    try{ return localStorage.getItem("cv_theme") || "teal"; }catch(e){ return "teal"; }
+  }
+  function saveTheme(name){
+    try{ localStorage.setItem("cv_theme", name); }catch(e){}
+  }
+  function applyTheme(name){
+    var t = THEMES[name] ? name : "teal";
+    var vars = THEMES[t];
+    var root = document.documentElement.style;
+    Object.keys(vars).forEach(function(k){ root.setProperty("--"+k, vars[k]); });
+    return t;
+  }
 
   var state = {
     visits: [],
     activeId: null,
     templates: JSON.parse(JSON.stringify(defaultTemplates)),
     tab: "visits",
-    loaded: false
+    loaded: false,
+    theme: applyTheme(getSavedTheme())
   };
 
   var timerHandle = null;
@@ -637,11 +685,77 @@
     render();
   }
 
+  function reorderTemplateArray(arr, oldIdx, newIdx){
+    var item = arr.splice(oldIdx,1)[0];
+    arr.splice(newIdx,0,item);
+    saveTemplates();
+    render();
+  }
+
+  // ---------- drag-to-reorder ----------
+  function makeReorderable(container, onDrop){
+    if(!container) return;
+    var dragRow=null, rows=[], startIndex=-1, currentIndex=-1, startY=0, rowH=0;
+
+    function onMove(e){
+      if(!dragRow) return;
+      var deltaY = e.clientY - startY;
+      dragRow.style.transform = "translateY("+deltaY+"px)";
+      var steps = Math.round(deltaY / rowH);
+      var target = Math.max(0, Math.min(rows.length-1, startIndex + steps));
+      currentIndex = target;
+      rows.forEach(function(r, i){
+        if(r === dragRow) return;
+        var shift = 0;
+        if(startIndex < i && i <= target) shift = -1;
+        else if(target <= i && i < startIndex) shift = 1;
+        r.style.transform = shift ? "translateY("+(shift*rowH)+"px)" : "";
+      });
+    }
+    function onUp(){
+      if(!dragRow) return;
+      var finalIndex = currentIndex;
+      var moved = finalIndex !== startIndex;
+      rows.forEach(function(r){ r.style.transform=""; r.classList.remove("dragging"); });
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      dragRow = null;
+      if(moved) onDrop(startIndex, finalIndex);
+    }
+
+    container.addEventListener("pointerdown", function(e){
+      var handle = e.target.closest(".drag-handle");
+      if(!handle || !container.contains(handle)) return;
+      var row = handle.closest(".lib-row");
+      if(!row) return;
+      rows = Array.prototype.slice.call(container.querySelectorAll(".lib-row"));
+      startIndex = rows.indexOf(row);
+      if(startIndex === -1) return;
+      e.preventDefault();
+      currentIndex = startIndex;
+      dragRow = row;
+      startY = e.clientY;
+      rowH = row.getBoundingClientRect().height;
+      row.classList.add("dragging");
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+    });
+  }
+
   function addTemplateItem(kind, value, category){
     value = value.trim();
     if(!value) return;
     var arr = category ? state.templates[kind][category] : state.templates[kind];
     arr.push(value);
+    saveTemplates();
+    render();
+  }
+  function addPhraseItem(category, title, phrase){
+    title = (title||"").trim();
+    phrase = (phrase||"").trim();
+    if(!title || !phrase) return;
+    if(!state.templates.phrases[category]) state.templates.phrases[category] = [];
+    state.templates.phrases[category].push({title: title, phrase: phrase});
     saveTemplates();
     render();
   }
@@ -816,7 +930,7 @@
 
     var phrasesHtml = Object.keys(state.templates.phrases).map(function(cat){
       var chips = state.templates.phrases[cat].map(function(p){
-        return '<div class="phrase-chip" data-text="'+escapeAttr(p)+'">'+escapeHtml(truncate(p,34))+'</div>';
+        return '<div class="phrase-chip" data-text="'+escapeAttr(p.phrase)+'">'+escapeHtml(truncate(p.title,26))+'</div>';
       }).join("");
       return '<div class="phrase-cat-label">'+escapeHtml(cat)+'</div><div class="phrase-scroll">'+chips+'</div>';
     }).join("");
@@ -852,27 +966,61 @@
     navTitle.textContent = "Library";
     navSub.textContent = "Customize your quick-entry lists";
 
-    function listBlock(kind, title, helptext, category){
-      var items = category ? state.templates[kind][category] : state.templates[kind];
-      var rows = items.map(function(it, idx){
-        return '<div class="lib-row"><div class="txt">'+escapeHtml(it)+'</div>'+
-          '<button data-kind="'+kind+'" data-idx="'+idx+'"'+(category?' data-cat="'+escapeAttr(category)+'"':'')+' class="rm-btn">'+icon("trash")+'</button></div>';
-      }).join("");
-      var addId = "add-"+kind+(category?"-"+category.replace(/\s+/g,''):"");
-      return '<div class="section-label">'+title+'</div>'+
-        (helptext ? '<div class="hint" style="margin-top:-4px;">'+helptext+'</div>' : '')+
-        '<div class="add-row"><input class="field" id="'+addId+'" placeholder="Add new…"><button class="btn btn-primary" data-add="'+kind+'"'+(category?' data-cat="'+escapeAttr(category)+'"':'')+' data-target="'+addId+'">Add</button></div>'+
-        '<div class="visit-list" style="margin-bottom:6px;">'+(rows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>';
-    }
+    var dragIcon = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="8" cy="6" r="1.6"/><circle cx="16" cy="6" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="18" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>';
 
-    var html = listBlock("tasks","Task checklist","Shown as tap-to-complete items on every new visit.");
+    var swatches = THEME_ORDER.map(function(name){
+      var c = THEMES[name].primary;
+      return '<button class="theme-swatch'+(state.theme===name?' active':'')+'" data-theme="'+name+'" style="background:'+c+';" aria-label="'+THEME_LABELS[name]+'"></button>';
+    }).join("");
+
+    var html = '<div class="section-label">Appearance</div>'+
+      '<div class="hint" style="margin-top:-4px;">Pick a look — applies everywhere in the app.</div>'+
+      '<div class="theme-swatches">'+swatches+'</div>';
+
+    var taskRows = state.templates.tasks.map(function(it, idx){
+      return '<div class="lib-row"><div class="drag-handle">'+dragIcon+'</div><div class="txt">'+escapeHtml(truncate(it,60))+'</div>'+
+        '<button data-kind="tasks" data-idx="'+idx+'" class="rm-btn">'+icon("trash")+'</button></div>';
+    }).join("");
+
+    html += '<div class="section-label">Task checklist</div>'+
+      '<div class="hint" style="margin-top:-4px;">Shown as tap-to-complete items on every new visit. Drag the handle to reorder.</div>'+
+      '<div class="add-row"><input class="field" id="add-tasks" placeholder="Add new…"><button class="btn btn-primary" data-add="tasks" data-target="add-tasks">Add</button></div>'+
+      '<div class="visit-list" style="margin-bottom:6px;" data-reorder-list="tasks">'+(taskRows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>';
+
     html += '<div class="section-label">Quick phrases</div>';
-    html += '<div class="hint" style="margin-top:-4px;">Grouped by what actually happened — pick the one that fits, then add your own detail. These are different outcomes, not restatements of the same one.</div>';
+    html += '<div class="hint" style="margin-top:-4px;">Each has a short title (what you\'ll see when picking) and a full phrase (what actually goes in the note) — different outcomes, not restatements of the same one. Drag the handle to reorder.</div>';
+
     Object.keys(state.templates.phrases).forEach(function(cat){
-      html += listBlock("phrases", cat, null, cat);
+      var items = state.templates.phrases[cat] || [];
+      var safeCat = cat.replace(/\s+/g,'');
+      var rows = items.map(function(p, idx){
+        return '<div class="lib-row lib-row-phrase"><div class="drag-handle">'+dragIcon+'</div>'+
+          '<div class="txt">'+
+            '<div class="phrase-title-lbl">'+escapeHtml(p.title)+'</div>'+
+            '<div class="phrase-full-txt">'+escapeHtml(truncate(p.phrase,72))+'</div>'+
+          '</div>'+
+          '<button data-kind="phrases" data-idx="'+idx+'" data-cat="'+escapeAttr(cat)+'" class="rm-btn">'+icon("trash")+'</button></div>';
+      }).join("");
+      html += '<div class="section-label" style="margin-top:14px;">'+escapeHtml(cat)+'</div>'+
+        '<div class="visit-list" style="margin-bottom:8px;" data-reorder-list="phrase" data-reorder-cat="'+escapeAttr(cat)+'">'+(rows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>'+
+        '<div class="add-phrase-form">'+
+          '<input class="field" id="addTitle-'+safeCat+'" placeholder="Short title (e.g. \u201cNeeds attention\u201d)">'+
+          '<input class="field" id="addText-'+safeCat+'" placeholder="Full phrase that goes in the note">'+
+          '<button class="btn btn-ghost btn-block" data-add-phrase-cat="'+escapeAttr(cat)+'" data-safe-cat="'+safeCat+'">+ Add phrase</button>'+
+        '</div>';
     });
 
     content.innerHTML = html;
+
+    content.querySelectorAll("[data-theme]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var name = btn.dataset.theme;
+        applyTheme(name);
+        saveTheme(name);
+        state.theme = name;
+        render();
+      });
+    });
 
     content.querySelectorAll("[data-add]").forEach(function(btn){
       btn.addEventListener("click", function(){
@@ -883,10 +1031,26 @@
         input.value = "";
       });
     });
+    content.querySelectorAll("[data-add-phrase-cat]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var cat = btn.dataset.addPhraseCat;
+        var safeCat = btn.dataset.safeCat;
+        var titleInput = document.getElementById("addTitle-"+safeCat);
+        var textInput = document.getElementById("addText-"+safeCat);
+        addPhraseItem(cat, titleInput.value, textInput.value);
+      });
+    });
     content.querySelectorAll(".rm-btn").forEach(function(btn){
       btn.addEventListener("click", function(){
         removeTemplateItem(btn.dataset.kind, parseInt(btn.dataset.idx,10), btn.dataset.cat);
       });
+    });
+    content.querySelectorAll('[data-reorder-list="tasks"]').forEach(function(el){
+      makeReorderable(el, function(oldIdx, newIdx){ reorderTemplateArray(state.templates.tasks, oldIdx, newIdx); });
+    });
+    content.querySelectorAll('[data-reorder-list="phrase"]').forEach(function(el){
+      var cat = el.dataset.reorderCat;
+      makeReorderable(el, function(oldIdx, newIdx){ reorderTemplateArray(state.templates.phrases[cat], oldIdx, newIdx); });
     });
   }
 
