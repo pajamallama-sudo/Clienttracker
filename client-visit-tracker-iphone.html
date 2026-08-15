@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Visit Log</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Visit Log">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F6B64">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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">
+<style>
+  :root{
+    --bg:#EDEFF1;
+    --surface:#FFFFFF;
+    --surface-alt:#F1F4F4;
+    --border:#E2E6E8;
+    --ink:#1C2B33;
+    --muted:#6E7A82;
+    --faint:#9AA5AB;
+    --primary:#0F6B64;
+    --primary-dark:#0A4F4B;
+    --primary-soft:#E3F1EF;
+    --amber:#E8A33D;
+    --amber-soft:#FCF1DC;
+    --sage:#4F8A6D;
+    --sage-soft:#E7F1EC;
+    --danger:#C4573F;
+    --danger-soft:#F7E9E5;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow:0 10px 28px rgba(28,43,51,0.10), 0 2px 6px rgba(28,43,51,0.06);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100%;
+    padding:28px 12px;
+  }
+  .frame-wrap{
+    width:100%;
+    max-width:390px;
+    display:flex;
+    flex-direction:column;
+  }
+  .device{
+    background:#0B0D0E;
+    border-radius:46px;
+    padding:12px;
+    box-shadow:var(--shadow);
+  }
+  .screen{
+    background:var(--bg);
+    border-radius:36px;
+    overflow:hidden;
+    height:800px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  @media (max-width:460px){
+    body{padding:0;}
+    .device{border-radius:0;padding:0;box-shadow:none;background:transparent;}
+    .screen{border-radius:0;height:100vh;}
+  }
+  /* When actually launched from the Home Screen (any device size, including
+     iPad), drop the phone-mockup chrome and let the app fill the window —
+     the fake frame/status-bar are only useful when just viewing this as a
+     regular webpage, not once it's installed and the real OS chrome exists. */
+  @media (display-mode: standalone){
+    body{padding:0;}
+    .frame-wrap{max-width:560px;margin:0 auto;}
+    .device{border-radius:0;padding:0;box-shadow:none;background:transparent;}
+    .screen{border-radius:0;height:100vh;}
+    .statusbar{display:none;}
+  }
+
+  /* status bar */
+  .statusbar{
+    height:44px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    background:var(--bg);
+  }
+  .statusbar .icons{display:flex;align-items:center;gap:5px;}
+
+  /* nav bar */
+  .navbar{
+    flex:0 0 auto;
+    padding:2px 20px 12px;
+    background:var(--bg);
+    transition:box-shadow .2s ease;
+  }
+  .navbar.scrolled{box-shadow:0 1px 0 var(--border);}
+  .navbar h1{
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-0.5px;
+    margin:0;
+  }
+  .navbar .sub{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:2px;
+    font-weight:500;
+  }
+
+  /* scroll area */
+  .content{
+    flex:1 1 auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:4px 16px 24px;
+  }
+  .content::-webkit-scrollbar{display:none;}
+
+  /* tab bar */
+  .tabbar{
+    flex:0 0 auto;
+    display:flex;
+    border-top:1px solid var(--border);
+    background:rgba(245,247,248,0.92);
+    backdrop-filter:blur(10px);
+    padding:8px 8px calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+  .tab{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    background:none;
+    border:none;
+    color:var(--faint);
+    font-family:var(--font);
+    font-size:10.5px;
+    font-weight:600;
+    padding:6px 0 0;
+    cursor:pointer;
+  }
+  .tab svg{width:24px;height:24px;stroke:var(--faint);}
+  .tab.active{color:var(--primary);}
+  .tab.active svg{stroke:var(--primary);}
+
+  /* stat row */
+  .stats-row{
+    display:flex;
+    gap:10px;
+    margin:8px 0 18px;
+  }
+  .stat-card{
+    flex:1;
+    background:var(--surface);
+    border-radius:var(--radius-md);
+    padding:12px 14px;
+    box-shadow:0 1px 2px rgba(28,43,51,0.05);
+    border:1px solid var(--border);
+  }
+  .stat-card .num{font-size:20px;font-weight:800;color:var(--primary-dark);}
+  .stat-card .lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
+
+  /* section label */
+  .section-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    margin:18px 4px 8px;
+  }
+  .section-label:first-child{margin-top:2px;}
+
+  /* visit row */
+  .visit-list{
+    background:var(--surface);
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .visit-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px 14px;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .visit-row:last-child{border-bottom:none;}
+  .visit-row:active{background:var(--surface-alt);}
+  .avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--primary-soft);
+    color:var(--primary-dark);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px;flex:0 0 auto;
+  }
+  .visit-row .body{flex:1;min-width:0;}
+  .visit-row .client{font-size:15px;font-weight:600;color:var(--ink);}
+  .visit-row .meta{font-size:12.5px;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:5px;}
+  .dot-live{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%{opacity:1;}50%{opacity:.35;}100%{opacity:1;}}
+  .duration-pill{
+    font-size:11.5px;font-weight:700;color:var(--primary-dark);
+    background:var(--primary-soft);padding:3px 9px;border-radius:20px;flex:0 0 auto;
+  }
+  .duration-pill.live{color:#8A5A12;background:var(--amber-soft);}
+  .chev{stroke:var(--faint);flex:0 0 auto;}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+  }
+  .empty-state .icon-wrap{
+    width:56px;height:56px;border-radius:50%;background:var(--surface-alt);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  }
+  .empty-state h3{margin:0 0 4px;font-size:16px;color:var(--ink);}
+  .empty-state p{margin:0 0 16px;font-size:13.5px;line-height:1.4;}
+
+  .btn{
+    border:none;font-family:var(--font);font-weight:700;cursor:pointer;
+    border-radius:var(--radius-sm);padding:13px 18px;font-size:15px;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:active{background:var(--primary-dark);}
+  .btn-block{width:100%;}
+  .btn-ghost{background:var(--surface-alt);color:var(--ink);}
+  .btn-danger{background:var(--danger-soft);color:var(--danger);}
+  .btn-sage{background:var(--sage);color:#fff;}
+
+  /* check-in screen */
+  .checkin-hero{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:22px 18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .pin-icon{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--primary-soft);color:var(--primary-dark);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  }
+  .field{
+    background:var(--surface-alt);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:12px 14px;
+    font-size:15px;
+    font-family:var(--font);
+    width:100%;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .field:focus{outline:2px solid var(--primary);outline-offset:-1px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 16px;justify-content:center;}
+  .chip{
+    background:var(--surface-alt);border:1px solid var(--border);
+    border-radius:20px;padding:6px 12px;font-size:12.5px;font-weight:600;
+    color:var(--ink);cursor:pointer;
+  }
+  .chip:active{background:var(--primary-soft);}
+
+  /* active visit card */
+  .live-card{
+    background:linear-gradient(160deg,#0F6B64,#0A4F4B);
+    border-radius:var(--radius-lg);
+    padding:22px 20px;
+    color:#fff;
+    text-align:center;
+    margin:6px 0 18px;
+    box-shadow:0 12px 26px rgba(15,107,100,0.28);
+  }
+  .live-card .client-name{font-size:17px;font-weight:700;}
+  .live-card .arrival-line{font-size:12.5px;opacity:0.75;margin-top:2px;}
+  .ring{
+    width:150px;height:150px;margin:18px auto 6px;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ring::before{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    border:6px solid rgba(255,255,255,0.18);
+  }
+  .ring::after{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    border:6px solid transparent;border-top-color:#fff;border-right-color:#fff;
+    animation:spin 3.2s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .ring .time{font-size:26px;font-weight:800;letter-spacing:0.5px;}
+  .ring .time-lbl{font-size:10.5px;opacity:0.7;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card h4{margin:0 0 10px;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .task-row{
+    display:flex;align-items:center;gap:10px;padding:8px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .task-row:last-child{border-bottom:none;}
+  .task-check{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+    flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .task-check.done{background:var(--sage);border-color:var(--sage);}
+  .task-check svg{width:12px;height:12px;stroke:#fff;display:none;}
+  .task-check.done svg{display:block;}
+  .task-label{font-size:14px;color:var(--ink);flex:1;}
+  .task-label.done{color:var(--muted);text-decoration:line-through;}
+
+  textarea.field{resize:vertical;min-height:88px;line-height:1.4;font-family:var(--font);}
+  .hint{font-size:11.5px;color:var(--muted);margin:-4px 0 12px;line-height:1.4;}
+  .phrase-cat-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin:2px 0 5px;}
+  .phrase-scroll{display:flex;gap:8px;overflow-x:auto;padding:0 0 10px;}
+  .phrase-chip{
+    flex:0 0 auto;background:var(--surface-alt);border:1px solid var(--border);
+    border-radius:16px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--ink);
+    white-space:nowrap;cursor:pointer;
+  }
+  .phrase-chip:active{background:var(--primary-soft);}
+
+  /* library rows */
+  .lib-row{
+    display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);
+  }
+  .lib-row:last-child{border-bottom:none;}
+  .lib-row .txt{flex:1;font-size:14px;color:var(--ink);}
+  .lib-row button{background:none;border:none;padding:4px;cursor:pointer;}
+  .lib-row button svg{width:17px;height:17px;stroke:var(--faint);}
+  .add-row{display:flex;gap:8px;margin-bottom:14px;}
+  .add-row .field{margin-bottom:0;}
+  .add-row .btn{flex:0 0 auto;padding:12px 16px;}
+
+  /* sheet modal */
+  .sheet-overlay{
+    position:absolute;inset:0;background:rgba(15,20,22,0.42);
+    display:none;align-items:flex-end;z-index:20;
+  }
+  .sheet-overlay.open{display:flex;}
+  .sheet{
+    background:var(--bg);
+    width:100%;
+    max-height:88%;
+    border-radius:24px 24px 0 0;
+    padding:10px 18px 26px;
+    overflow-y:auto;
+    animation:slideup .22s ease;
+  }
+  @keyframes slideup{from{transform:translateY(24px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:3px;margin:6px auto 14px;}
+  .sheet h2{font-size:19px;margin:2px 0 2px;font-weight:800;}
+  .sheet .close-x{position:absolute;top:14px;right:16px;background:var(--surface-alt);border:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+  .detail-row .k{color:var(--muted);}
+  .detail-row .v{font-weight:600;color:var(--ink);}
+  .confirm-row{display:flex;gap:8px;margin-top:14px;}
+  .confirm-row .btn{flex:1;}
+
+  /* monthly export / print */
+  #printArea{ display:none; }
+  body.printing > .frame-wrap{ display:none; }
+  body.printing #printArea{
+    display:block; max-width:680px; margin:0 auto; padding:32px;
+    font-family:Georgia,'Times New Roman',serif; color:#1a1a1a; background:#fff;
+  }
+  .print-title{ font-size:22px; font-weight:800; margin-bottom:2px; }
+  .print-sub{ font-size:12px; color:#555; margin-bottom:22px; font-family:var(--font); }
+  .print-visit{ page-break-inside:avoid; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid #ddd; }
+  .print-visit h3{ font-size:15px; margin:0 0 3px; }
+  .print-meta{ font-size:11.5px; color:#555; margin-bottom:8px; font-family:var(--font); }
+  .print-label{ font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:#888; margin:8px 0 2px; font-family:var(--font); }
+  .print-tasks{ font-size:12.5px; }
+  .print-notes{ font-size:13px; line-height:1.55; white-space:pre-wrap; }
+  @media print{
+    body.printing #printArea{ padding:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame-wrap">
+  <div class="device">
+    <div class="screen">
+
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="icons">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="6" width="3" height="5" rx="0.5" fill="#1C2B33"/><rect x="4.5" y="4" width="3" height="7" rx="0.5" fill="#1C2B33"/><rect x="9" y="2" width="3" height="9" rx="0.5" fill="#1C2B33"/><rect x="13.5" y="0" width="3" height="11" rx="0.5" fill="#1C2B33"/></svg>
+          <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#1C2B33" stroke-width="1"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.2" fill="#1C2B33"/><rect x="22" y="4" width="1.6" height="4" rx="0.8" fill="#1C2B33"/></svg>
+        </div>
+      </div>
+
+      <div class="navbar" id="navbar">
+        <h1 id="navTitle">Visits</h1>
+        <div class="sub" id="navSub">Your client visit history</div>
+      </div>
+
+      <div class="content" id="content"></div>
+
+      <div class="tabbar">
+        <button class="tab" data-tab="visits">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          Visits
+        </button>
+        <button class="tab" data-tab="checkin">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+          Check In
+        </button>
+        <button class="tab" data-tab="library">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5v-13Z"/></svg>
+          Library
+        </button>
+      </div>
+
+      <div class="sheet-overlay" id="sheetOverlay">
+        <div class="sheet" id="sheetBody" style="position:relative;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORE_VISITS = "cv_visits";
+  var STORE_TEMPLATES = "cv_templates";
+
+  var defaultTemplates = {
+    tasks: [
+      "Reviewed status with client",
+      "Completed scheduled work items",
+      "Inspected site / work area",
+      "Confirmed next steps"
+    ],
+    phrases: {
+      "Summary": [
+        "Client was available and engaged throughout the visit.",
+        "Visit was brief; client had limited availability.",
+        "Client was not present; spoke with a household or site contact instead."
+      ],
+      "Findings": [
+        "No issues or concerns were reported.",
+        "Client raised a question that needs follow-up.",
+        "Noticed an item that needs attention before the next visit."
+      ],
+      "Next steps": [
+        "No further action needed at this time.",
+        "Discussed timeline for the next visit.",
+        "Client requested a follow-up call this week."
+      ]
+    }
+  };
+
+  var state = {
+    visits: [],
+    activeId: null,
+    templates: JSON.parse(JSON.stringify(defaultTemplates)),
+    tab: "visits",
+    loaded: false
+  };
+
+  var timerHandle = null;
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function initials(name){
+    var parts = name.trim().split(/\s+/);
+    var i = parts[0] ? parts[0][0] : "?";
+    var j = parts.length > 1 ? parts[parts.length-1][0] : "";
+    return (i+j).toUpperCase();
+  }
+
+  function localDateKey(ts){
+    var d = new Date(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+
+  function groupLabel(key){
+    var today = localDateKey(Date.now());
+    var y = new Date(Date.now()); y.setDate(y.getDate()-1);
+    var yest = localDateKey(y.getTime());
+    if(key === today) return "Today";
+    if(key === yest) return "Yesterday";
+    var d = new Date(key+"T12:00:00");
+    return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  }
+
+  function formatTime(ts){
+    return new Date(ts).toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+  }
+
+  function formatDuration(ms){
+    var totalMin = Math.max(0, Math.round(ms/60000));
+    var h = Math.floor(totalMin/60), m = totalMin%60;
+    if(h > 0) return h+"h "+m+"m";
+    return m+"m";
+  }
+
+  function formatElapsed(ms){
+    var s = Math.floor(ms/1000);
+    var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    if(h>0) return h+":"+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+    return String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+  }
+
+  // ---------- persistence (local to this device / browser) ----------
+  function loadState(){
+    try{
+      var v = localStorage.getItem(STORE_VISITS);
+      if(v) state.visits = JSON.parse(v);
+    }catch(e){ state.visits = []; }
+    try{
+      var t = localStorage.getItem(STORE_TEMPLATES);
+      if(t) state.templates = JSON.parse(t);
+    }catch(e){ state.templates = JSON.parse(JSON.stringify(defaultTemplates)); }
+    if(Array.isArray(state.templates.phrases)){
+      state.templates.phrases = { "Quick phrases": state.templates.phrases };
+    }
+    if(!state.templates.phrases){
+      state.templates.phrases = JSON.parse(JSON.stringify(defaultTemplates.phrases));
+    }
+    var active = state.visits.find(function(x){return x.status==="active";});
+    state.activeId = active ? active.id : null;
+    state.loaded = true;
+    render();
+    if(state.activeId){ startTicking(); }
+  }
+
+  function saveVisits(){
+    try{ localStorage.setItem(STORE_VISITS, JSON.stringify(state.visits)); }
+    catch(e){ console.error("Could not save visits", e); }
+  }
+  function saveTemplates(){
+    try{ localStorage.setItem(STORE_TEMPLATES, JSON.stringify(state.templates)); }
+    catch(e){ console.error("Could not save templates", e); }
+  }
+
+  // ---------- actions ----------
+  function getActiveVisit(){
+    return state.visits.find(function(x){return x.id===state.activeId;});
+  }
+
+  function startVisit(clientName){
+    clientName = clientName.trim();
+    if(!clientName) return;
+    var v = {
+      id: uid(),
+      client: clientName,
+      arrival: Date.now(),
+      departure: null,
+      status: "active",
+      tasks: state.templates.tasks.map(function(t){ return {id: uid(), label: t, done:false}; }),
+      notes: ""
+    };
+    state.visits.unshift(v);
+    state.activeId = v.id;
+    saveVisits();
+    startTicking();
+    render();
+  }
+
+  function endVisit(){
+    var v = getActiveVisit();
+    if(!v) return;
+    v.departure = Date.now();
+    v.status = "done";
+    state.activeId = null;
+    stopTicking();
+    saveVisits();
+    state.tab = "visits";
+    render();
+  }
+
+  function toggleTask(taskId){
+    var v = getActiveVisit();
+    if(!v) return;
+    var t = v.tasks.find(function(x){return x.id===taskId;});
+    if(t){ t.done = !t.done; saveVisits(); renderActiveCard(); }
+  }
+
+  function updateNotes(text){
+    var v = getActiveVisit();
+    if(!v) return;
+    v.notes = text;
+    saveVisits();
+  }
+
+  function joinNote(existing, addition){
+    existing = existing.replace(/\s+$/,"");
+    if(!existing) return addition;
+    if(!/[.!?]$/.test(existing)) existing += ".";
+    return existing + " " + addition;
+  }
+
+  function insertPhrase(text){
+    var ta = document.getElementById("notesArea");
+    if(!ta) return;
+    ta.value = joinNote(ta.value, text);
+    updateNotes(ta.value);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+  }
+
+  function deleteVisit(id){
+    state.visits = state.visits.filter(function(x){return x.id!==id;});
+    saveVisits();
+    closeSheet();
+    render();
+  }
+
+  function addTemplateItem(kind, value, category){
+    value = value.trim();
+    if(!value) return;
+    var arr = category ? state.templates[kind][category] : state.templates[kind];
+    arr.push(value);
+    saveTemplates();
+    render();
+  }
+  function removeTemplateItem(kind, index, category){
+    var arr = category ? state.templates[kind][category] : state.templates[kind];
+    arr.splice(index,1);
+    saveTemplates();
+    render();
+  }
+
+  function startTicking(){
+    stopTicking();
+    timerHandle = setInterval(function(){
+      var v = getActiveVisit();
+      if(!v){ stopTicking(); return; }
+      var el = document.getElementById("liveElapsed");
+      if(el) el.textContent = formatElapsed(Date.now()-v.arrival);
+      var dots = document.querySelectorAll(".dot-live");
+    }, 1000);
+  }
+  function stopTicking(){
+    if(timerHandle){ clearInterval(timerHandle); timerHandle=null; }
+  }
+
+  // ---------- rendering ----------
+  var content = document.getElementById("content");
+  var navTitle = document.getElementById("navTitle");
+  var navSub = document.getElementById("navSub");
+
+  function icon(name){
+    var map = {
+      chev: '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+      trash: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 7"/></svg>',
+      clipboard: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A4F4B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>'
+    };
+    return map[name] || "";
+  }
+
+  function render(){
+    if(!state.loaded){
+      content.innerHTML = '<div class="empty-state"><p>Loading your visits…</p></div>';
+      return;
+    }
+    document.querySelectorAll(".tab").forEach(function(b){
+      b.classList.toggle("active", b.dataset.tab===state.tab);
+    });
+    if(state.tab==="visits") renderVisitsTab();
+    else if(state.tab==="checkin") renderCheckinTab();
+    else renderLibraryTab();
+  }
+
+  function renderVisitsTab(){
+    navTitle.textContent = "Visits";
+    navSub.textContent = "Your client visit history";
+
+    var weekAgo = Date.now() - 7*24*60*60*1000;
+    var thisWeek = state.visits.filter(function(v){ return v.arrival >= weekAgo; });
+    var doneThisWeek = thisWeek.filter(function(v){ return v.status==="done"; });
+    var avgMs = doneThisWeek.length ? doneThisWeek.reduce(function(s,v){return s+(v.departure-v.arrival);},0)/doneThisWeek.length : 0;
+
+    var html = '';
+    html += '<div class="stats-row">';
+    html += '<div class="stat-card"><div class="num">'+thisWeek.length+'</div><div class="lbl">This week</div></div>';
+    html += '<div class="stat-card"><div class="num">'+(avgMs?formatDuration(avgMs):"—")+'</div><div class="lbl">Avg. visit</div></div>';
+    html += '</div>';
+
+    if(state.visits.length===0){
+      html += '<div class="empty-state">'+
+        '<div class="icon-wrap">'+icon("clipboard")+'</div>'+
+        '<h3>No visits logged yet</h3>'+
+        '<p>Check in when you arrive at your first<br>client visit to get started.</p>'+
+        '<button class="btn btn-primary" id="emptyStartBtn">Start a visit</button>'+
+        '</div>';
+      content.innerHTML = html;
+      var esb = document.getElementById("emptyStartBtn");
+      if(esb) esb.addEventListener("click", function(){ state.tab="checkin"; render(); });
+      return;
+    }
+
+    html += '<button class="btn btn-ghost btn-block" id="exportBtn" style="margin-bottom:16px;">Export monthly report</button>';
+
+    var groups = {};
+    var order = [];
+    state.visits.slice().sort(function(a,b){return b.arrival-a.arrival;}).forEach(function(v){
+      var k = localDateKey(v.arrival);
+      if(!groups[k]){ groups[k]=[]; order.push(k); }
+      groups[k].push(v);
+    });
+
+    order.forEach(function(k){
+      html += '<div class="section-label">'+groupLabel(k)+'</div>';
+      html += '<div class="visit-list">';
+      groups[k].forEach(function(v){
+        var isLive = v.status==="active";
+        var timeRange = isLive
+          ? formatTime(v.arrival)+' – now'
+          : formatTime(v.arrival)+' – '+formatTime(v.departure);
+        var pill = isLive
+          ? '<span class="duration-pill live">In progress</span>'
+          : '<span class="duration-pill">'+formatDuration(v.departure-v.arrival)+'</span>';
+        html += '<div class="visit-row" data-id="'+v.id+'">'+
+          '<div class="avatar">'+initials(v.client)+'</div>'+
+          '<div class="body">'+
+            '<div class="client">'+escapeHtml(v.client)+'</div>'+
+            '<div class="meta">'+(isLive?'<span class="dot-live"></span>':'')+timeRange+'</div>'+
+          '</div>'+
+          pill+
+          icon("chev")+
+        '</div>';
+      });
+      html += '</div>';
+    });
+
+    content.innerHTML = html;
+    content.querySelectorAll(".visit-row").forEach(function(row){
+      row.addEventListener("click", function(){
+        var v = state.visits.find(function(x){return x.id===row.dataset.id;});
+        if(v.status==="active"){ state.tab="checkin"; render(); }
+        else openVisitDetail(v);
+      });
+    });
+    var exportBtn = document.getElementById("exportBtn");
+    if(exportBtn) exportBtn.addEventListener("click", openExportSheet);
+  }
+
+  function renderCheckinTab(){
+    var active = getActiveVisit();
+    if(active){
+      navTitle.textContent = "Check In";
+      navSub.textContent = "Visit in progress";
+      renderActiveCard();
+    } else {
+      navTitle.textContent = "Check In";
+      navSub.textContent = "Start a new client visit";
+
+      var recents = [];
+      state.visits.forEach(function(v){ if(recents.indexOf(v.client)===-1) recents.push(v.client); });
+      recents = recents.slice(0,6);
+
+      var html = '<div class="checkin-hero">'+
+        '<div class="pin-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></div>'+
+        '<div style="font-weight:700;font-size:16px;">Arriving at a client?</div>'+
+        '<div style="font-size:12.5px;color:var(--muted);margin:2px 0 16px;">Check in to start timing this visit</div>'+
+        '<input class="field" id="clientInput" placeholder="Client name" autocomplete="off">'+
+        (recents.length ? '<div class="chip-row" id="recentChips">'+recents.map(function(r){return '<div class="chip" data-name="'+escapeAttr(r)+'">'+escapeHtml(r)+'</div>';}).join("")+'</div>' : '')+
+        '<button class="btn btn-primary btn-block" id="startBtn">Check In &amp; Start Visit</button>'+
+        '</div>';
+      content.innerHTML = html;
+
+      var input = document.getElementById("clientInput");
+      document.querySelectorAll("#recentChips .chip").forEach(function(c){
+        c.addEventListener("click", function(){ input.value = c.dataset.name; input.focus(); });
+      });
+      document.getElementById("startBtn").addEventListener("click", function(){
+        startVisit(input.value);
+      });
+      input.addEventListener("keydown", function(e){ if(e.key==="Enter") startVisit(input.value); });
+    }
+  }
+
+  function renderActiveCard(){
+    var v = getActiveVisit();
+    if(!v) return;
+
+    var tasksHtml = v.tasks.map(function(t){
+      return '<div class="task-row">'+
+        '<div class="task-check '+(t.done?"done":"")+'" data-id="'+t.id+'">'+icon("check")+'</div>'+
+        '<div class="task-label '+(t.done?"done":"")+'">'+escapeHtml(t.label)+'</div>'+
+      '</div>';
+    }).join("");
+
+    var phrasesHtml = Object.keys(state.templates.phrases).map(function(cat){
+      var chips = state.templates.phrases[cat].map(function(p){
+        return '<div class="phrase-chip" data-text="'+escapeAttr(p)+'">'+escapeHtml(truncate(p,34))+'</div>';
+      }).join("");
+      return '<div class="phrase-cat-label">'+escapeHtml(cat)+'</div><div class="phrase-scroll">'+chips+'</div>';
+    }).join("");
+
+    var html = '<div class="live-card">'+
+        '<div class="client-name">'+escapeHtml(v.client)+'</div>'+
+        '<div class="arrival-line">Arrived '+formatTime(v.arrival)+'</div>'+
+        '<div class="ring"><div><div class="time" id="liveElapsed">'+formatElapsed(Date.now()-v.arrival)+'</div><div class="time-lbl">Elapsed</div></div></div>'+
+      '</div>'+
+      '<div class="card"><h4>Tasks completed</h4>'+tasksHtml+'</div>'+
+      '<div class="card">'+
+        '<h4>Progress notes</h4>'+
+        phrasesHtml+
+        '<textarea class="field" id="notesArea" placeholder="What happened at this visit?">'+escapeHtml(v.notes)+'</textarea>'+
+        '<div class="hint">Tip: the phrases above insert instantly — add one detail specific to today so the note reflects this visit, not just a template.</div>'+
+      '</div>'+
+      '<button class="btn btn-sage btn-block" id="endBtn">End Visit &amp; Save</button>';
+
+    content.innerHTML = html;
+
+    content.querySelectorAll(".task-check").forEach(function(el){
+      el.addEventListener("click", function(){ toggleTask(el.dataset.id); });
+    });
+    content.querySelectorAll(".phrase-chip").forEach(function(el){
+      el.addEventListener("click", function(){ insertPhrase(el.dataset.text); });
+    });
+    var ta = document.getElementById("notesArea");
+    ta.addEventListener("input", function(){ updateNotes(ta.value); });
+    document.getElementById("endBtn").addEventListener("click", endVisit);
+  }
+
+  function renderLibraryTab(){
+    navTitle.textContent = "Library";
+    navSub.textContent = "Customize your quick-entry lists";
+
+    function listBlock(kind, title, helptext, category){
+      var items = category ? state.templates[kind][category] : state.templates[kind];
+      var rows = items.map(function(it, idx){
+        return '<div class="lib-row"><div class="txt">'+escapeHtml(it)+'</div>'+
+          '<button data-kind="'+kind+'" data-idx="'+idx+'"'+(category?' data-cat="'+escapeAttr(category)+'"':'')+' class="rm-btn">'+icon("trash")+'</button></div>';
+      }).join("");
+      var addId = "add-"+kind+(category?"-"+category.replace(/\s+/g,''):"");
+      return '<div class="section-label">'+title+'</div>'+
+        (helptext ? '<div class="hint" style="margin-top:-4px;">'+helptext+'</div>' : '')+
+        '<div class="add-row"><input class="field" id="'+addId+'" placeholder="Add new…"><button class="btn btn-primary" data-add="'+kind+'"'+(category?' data-cat="'+escapeAttr(category)+'"':'')+' data-target="'+addId+'">Add</button></div>'+
+        '<div class="visit-list" style="margin-bottom:6px;">'+(rows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>';
+    }
+
+    var html = listBlock("tasks","Task checklist","Shown as tap-to-complete items on every new visit.");
+    html += '<div class="section-label">Quick phrases</div>';
+    html += '<div class="hint" style="margin-top:-4px;">Grouped by what actually happened — pick the one that fits, then add your own detail. These are different outcomes, not restatements of the same one.</div>';
+    Object.keys(state.templates.phrases).forEach(function(cat){
+      html += listBlock("phrases", cat, null, cat);
+    });
+
+    content.innerHTML = html;
+
+    content.querySelectorAll("[data-add]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var kind = btn.dataset.add;
+        var cat = btn.dataset.cat;
+        var input = document.getElementById(btn.dataset.target);
+        addTemplateItem(kind, input.value, cat);
+        input.value = "";
+      });
+    });
+    content.querySelectorAll(".rm-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        removeTemplateItem(btn.dataset.kind, parseInt(btn.dataset.idx,10), btn.dataset.cat);
+      });
+    });
+  }
+
+  // ---------- sheet (visit detail) ----------
+  var sheetOverlay = document.getElementById("sheetOverlay");
+  var sheetBody = document.getElementById("sheetBody");
+
+  function openVisitDetail(v){
+    var tasksDone = v.tasks.filter(function(t){return t.done;});
+    var html = '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>'+escapeHtml(v.client)+'</h2>'+
+      '<div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">'+groupLabel(localDateKey(v.arrival))+'</div>'+
+      '<div class="card" style="margin-bottom:12px;">'+
+        '<div class="detail-row"><div class="k">Arrival</div><div class="v">'+formatTime(v.arrival)+'</div></div>'+
+        '<div class="detail-row"><div class="k">Departure</div><div class="v">'+formatTime(v.departure)+'</div></div>'+
+        '<div class="detail-row" style="border-bottom:none;"><div class="k">Duration</div><div class="v">'+formatDuration(v.departure-v.arrival)+'</div></div>'+
+      '</div>'+
+      (tasksDone.length ? '<div class="card"><h4>Tasks completed</h4>'+tasksDone.map(function(t){return '<div class="task-row"><div class="task-check done">'+icon("check")+'</div><div class="task-label">'+escapeHtml(t.label)+'</div></div>';}).join("")+'</div>' : '')+
+      '<div class="card"><h4>Progress notes</h4><div style="font-size:14px;line-height:1.5;color:var(--ink);">'+(v.notes ? escapeHtml(v.notes) : '<span style="color:var(--muted);">No notes recorded.</span>')+'</div></div>'+
+      '<div id="deleteZone">'+
+        '<button class="btn btn-danger btn-block" id="askDeleteBtn">Delete visit</button>'+
+      '</div>';
+    sheetBody.innerHTML = html;
+    sheetOverlay.classList.add("open");
+
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("askDeleteBtn").addEventListener("click", function(){
+      document.getElementById("deleteZone").innerHTML =
+        '<div class="confirm-row">'+
+          '<button class="btn btn-ghost" id="cancelDel">Cancel</button>'+
+          '<button class="btn btn-danger" id="confirmDel">Confirm delete</button>'+
+        '</div>';
+      document.getElementById("cancelDel").addEventListener("click", function(){ openVisitDetail(v); });
+      document.getElementById("confirmDel").addEventListener("click", function(){ deleteVisit(v.id); });
+    });
+  }
+
+  function closeSheet(){
+    sheetOverlay.classList.remove("open");
+  }
+  sheetOverlay.addEventListener("click", function(e){
+    if(e.target===sheetOverlay) closeSheet();
+  });
+
+  // ---------- monthly export ----------
+  function openExportSheet(){
+    var counts = {};
+    state.visits.forEach(function(v){
+      var mk = localDateKey(v.arrival).slice(0,7);
+      counts[mk] = (counts[mk]||0) + 1;
+    });
+    var keys = Object.keys(counts).sort().reverse();
+    if(keys.length === 0){
+      sheetBody.innerHTML = '<button class="close-x" id="closeSheetBtn">\u2715</button>'+
+        '<div class="sheet-handle"></div>'+
+        '<h2>Export monthly report</h2>'+
+        '<div class="hint" style="margin-top:10px;">No visits yet to export.</div>';
+      sheetOverlay.classList.add("open");
+      document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+      return;
+    }
+    var options = keys.map(function(k){
+      var label = new Date(k+"-15T12:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
+      return '<option value="'+k+'">'+escapeHtml(label)+' ('+counts[k]+' visit'+(counts[k]===1?'':'s')+')</option>';
+    }).join("");
+    sheetBody.innerHTML = '<button class="close-x" id="closeSheetBtn">\u2715</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>Export monthly report</h2>'+
+      '<div class="hint" style="margin-top:6px;margin-bottom:14px;">Builds a printable document for the month you choose. From the print sheet, use Save to Files to keep it as a PDF.</div>'+
+      '<select class="field" id="exportMonthSelect">'+options+'</select>'+
+      '<button class="btn btn-primary btn-block" id="exportGoBtn">Generate</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("exportGoBtn").addEventListener("click", function(){
+      printMonth(document.getElementById("exportMonthSelect").value);
+    });
+  }
+
+  function printMonth(monthKey){
+    var visits = state.visits.filter(function(v){ return localDateKey(v.arrival).slice(0,7) === monthKey; })
+      .sort(function(a,b){ return a.arrival-b.arrival; });
+    var monthLabel = new Date(monthKey+"-15T12:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    var totalMs = visits.reduce(function(s,v){ return s + ((v.departure||Date.now())-v.arrival); },0);
+
+    var html = '<div class="print-title">Client Visit Log \u2014 '+escapeHtml(monthLabel)+'</div>'+
+      '<div class="print-sub">'+visits.length+' visit'+(visits.length===1?'':'s')+' &middot; total time '+formatDuration(totalMs)+' &middot; generated '+new Date().toLocaleDateString()+'</div>';
+
+    visits.forEach(function(v){
+      var doneTasks = v.tasks.filter(function(t){ return t.done; });
+      var dateLabel = new Date(v.arrival).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+      var timeLabel = formatTime(v.arrival) + '\u2013' + (v.departure ? formatTime(v.departure) : 'in progress') +
+        (v.departure ? ' (' + formatDuration(v.departure - v.arrival) + ')' : '');
+      html += '<div class="print-visit">'+
+        '<h3>'+escapeHtml(v.client)+'</h3>'+
+        '<div class="print-meta">'+dateLabel+' &middot; '+timeLabel+'</div>'+
+        (doneTasks.length ? '<div class="print-label">Tasks completed</div><div class="print-tasks">'+doneTasks.map(function(t){ return escapeHtml(t.label); }).join(', ')+'</div>' : '')+
+        '<div class="print-label">Notes</div><div class="print-notes">'+(v.notes ? escapeHtml(v.notes) : '\u2014')+'</div>'+
+      '</div>';
+    });
+
+    document.getElementById("printArea").innerHTML = html;
+    document.body.classList.add("printing");
+    closeSheet();
+    setTimeout(function(){ window.print(); }, 80);
+  }
+  window.addEventListener("afterprint", function(){
+    document.body.classList.remove("printing");
+  });
+
+  // ---------- helpers ----------
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function escapeAttr(s){ return escapeHtml(s).replace(/\n/g," "); }
+  function truncate(s,n){ return s.length>n ? s.slice(0,n-1)+"…" : s; }
+
+  // ---------- nav events ----------
+  document.querySelectorAll(".tab").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.tab = btn.dataset.tab;
+      render();
+    });
+  });
+
+  var navbar = document.getElementById("navbar");
+  var contentEl = document.getElementById("content");
+  contentEl.addEventListener("scroll", function(){
+    navbar.classList.toggle("scrolled", contentEl.scrollTop > 4);
+  });
+
+  loadState();
+})();
+</script>
+</body>
+</html>
