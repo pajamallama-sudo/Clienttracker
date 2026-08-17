@@ -212,7 +212,7 @@
     font-weight:700;font-size:14px;flex:0 0 auto;
   }
   .visit-row .body{flex:1;min-width:0;}
-  .visit-row .client{font-size:15px;font-weight:600;color:var(--ink);}
+  .visit-row .individual{font-size:15px;font-weight:600;color:var(--ink);}
   .visit-row .meta{font-size:12.5px;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:5px;}
   .dot-live{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.4s infinite;}
   @keyframes pulse{0%{opacity:1;}50%{opacity:.35;}100%{opacity:1;}}
@@ -291,7 +291,7 @@
     margin:6px 0 18px;
     box-shadow:0 12px 26px rgba(15,107,100,0.28);
   }
-  .live-card .client-name{font-size:17px;font-weight:700;}
+  .live-card .individual-name{font-size:17px;font-weight:700;}
   .live-card .arrival-line{font-size:12.5px;opacity:0.75;margin-top:2px;}
   .ring{
     width:150px;height:150px;margin:18px auto 6px;position:relative;
@@ -428,7 +428,7 @@
 
       <div class="navbar" id="navbar">
         <h1 id="navTitle">Visits</h1>
-        <div class="sub" id="navSub">Your client visit history</div>
+        <div class="sub" id="navSub">Your individual visit history</div>
       </div>
 
       <div class="content" id="content"></div>
@@ -467,34 +467,34 @@
 
   var defaultTemplates = {
     tasks: [
-      "Reviewed status with client",
+      "Reviewed status with individual",
       "Completed scheduled work items",
       "Inspected site / work area",
       "Confirmed next steps"
     ],
     phrases: {
       "Summary": [
-        {title:"Engaged & available", phrase:"Client was available and engaged throughout the visit."},
-        {title:"Brief visit", phrase:"Visit was brief; client had limited availability."},
-        {title:"Client not present", phrase:"Client was not present; spoke with a household or site contact instead."},
-        {title:"First visit", phrase:"First visit with this client — spent time on introductions and orientation."},
+        {title:"Engaged & available", phrase:"Individual was available and engaged throughout the visit."},
+        {title:"Brief visit", phrase:"Visit was brief; individual had limited availability."},
+        {title:"Individual not present", phrase:"Individual was not present; spoke with a household or site contact instead."},
+        {title:"First visit", phrase:"First visit with this individual — spent time on introductions and orientation."},
         {title:"Rescheduled partway", phrase:"Visit had to be rescheduled partway through."},
-        {title:"Distracted / preoccupied", phrase:"Client seemed distracted or preoccupied during the visit."},
+        {title:"Distracted / preoccupied", phrase:"Individual seemed distracted or preoccupied during the visit."},
         {title:"Family present", phrase:"A family member or caregiver was present for part of the visit."}
       ],
       "Findings": [
         {title:"Nothing to report", phrase:"No issues or concerns were reported."},
-        {title:"Open question", phrase:"Client raised a question that needs follow-up."},
+        {title:"Open question", phrase:"Individual raised a question that needs follow-up."},
         {title:"Needs attention", phrase:"Noticed an item that needs attention before the next visit."},
-        {title:"Something's changed", phrase:"Client mentioned a change since the last visit."},
+        {title:"Something's changed", phrase:"Individual mentioned a change since the last visit."},
         {title:"Visit cut short", phrase:"Something prevented part of the visit from being completed as planned."},
-        {title:"New concern raised", phrase:"Client raised a new concern that hasn't come up before."},
+        {title:"New concern raised", phrase:"Individual raised a new concern that hasn't come up before."},
         {title:"Everything on track", phrase:"Everything discussed matched what was expected for this visit."}
       ],
       "Next steps": [
         {title:"No action needed", phrase:"No further action needed at this time."},
         {title:"Discussed timeline", phrase:"Discussed timeline for the next visit."},
-        {title:"Call requested", phrase:"Client requested a follow-up call this week."},
+        {title:"Call requested", phrase:"Individual requested a follow-up call this week."},
         {title:"Flagged to supervisor", phrase:"Flagged this for a supervisor or teammate to follow up on."},
         {title:"More frequent visits", phrase:"Increased visit frequency going forward."},
         {title:"Sent info/resources", phrase:"Followed up by sending information or resources after the visit."},
@@ -617,12 +617,12 @@
     return state.visits.find(function(x){return x.id===state.activeId;});
   }
 
-  function startVisit(clientName){
-    clientName = clientName.trim();
-    if(!clientName) return;
+  function startVisit(individualName){
+    individualName = individualName.trim();
+    if(!individualName) return;
     var v = {
       id: uid(),
-      client: clientName,
+      individual: individualName,
       arrival: Date.now(),
       departure: null,
       status: "active",
@@ -810,7 +810,7 @@
 
   function renderVisitsTab(){
     navTitle.textContent = "Visits";
-    navSub.textContent = "Your client visit history";
+    navSub.textContent = "Your individual visit history";
 
     var weekAgo = Date.now() - 7*24*60*60*1000;
     var thisWeek = state.visits.filter(function(v){ return v.arrival >= weekAgo; });
@@ -827,7 +827,7 @@
       html += '<div class="empty-state">'+
         '<div class="icon-wrap">'+icon("clipboard")+'</div>'+
         '<h3>No visits logged yet</h3>'+
-        '<p>Check in when you arrive at your first<br>client visit to get started.</p>'+
+        '<p>Check in when you arrive at your first<br>individual visit to get started.</p>'+
         '<button class="btn btn-primary" id="emptyStartBtn">Start a visit</button>'+
         '</div>';
       content.innerHTML = html;
@@ -858,9 +858,9 @@
           ? '<span class="duration-pill live">In progress</span>'
           : '<span class="duration-pill">'+formatDuration(v.departure-v.arrival)+'</span>';
         html += '<div class="visit-row" data-id="'+v.id+'">'+
-          '<div class="avatar">'+initials(v.client)+'</div>'+
+          '<div class="avatar">'+initials(v.individual)+'</div>'+
           '<div class="body">'+
-            '<div class="client">'+escapeHtml(v.client)+'</div>'+
+            '<div class="individual">'+escapeHtml(v.individual)+'</div>'+
             '<div class="meta">'+(isLive?'<span class="dot-live"></span>':'')+timeRange+'</div>'+
           '</div>'+
           pill+
@@ -890,23 +890,23 @@
       renderActiveCard();
     } else {
       navTitle.textContent = "Check In";
-      navSub.textContent = "Start a new client visit";
+      navSub.textContent = "Start a new individual visit";
 
       var recents = [];
-      state.visits.forEach(function(v){ if(recents.indexOf(v.client)===-1) recents.push(v.client); });
+      state.visits.forEach(function(v){ if(recents.indexOf(v.individual)===-1) recents.push(v.individual); });
       recents = recents.slice(0,6);
 
       var html = '<div class="checkin-hero">'+
         '<div class="pin-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></div>'+
-        '<div style="font-weight:700;font-size:16px;">Arriving at a client?</div>'+
+        '<div style="font-weight:700;font-size:16px;">Arriving at a individual?</div>'+
         '<div style="font-size:12.5px;color:var(--muted);margin:2px 0 16px;">Check in to start timing this visit</div>'+
-        '<input class="field" id="clientInput" placeholder="Client name" autocomplete="off">'+
+        '<input class="field" id="individualInput" placeholder="Individual name" autocomplete="off">'+
         (recents.length ? '<div class="chip-row" id="recentChips">'+recents.map(function(r){return '<div class="chip" data-name="'+escapeAttr(r)+'">'+escapeHtml(r)+'</div>';}).join("")+'</div>' : '')+
         '<button class="btn btn-primary btn-block" id="startBtn">Check In &amp; Start Visit</button>'+
         '</div>';
       content.innerHTML = html;
 
-      var input = document.getElementById("clientInput");
+      var input = document.getElementById("individualInput");
       document.querySelectorAll("#recentChips .chip").forEach(function(c){
         c.addEventListener("click", function(){ input.value = c.dataset.name; input.focus(); });
       });
@@ -936,7 +936,7 @@
     }).join("");
 
     var html = '<div class="live-card">'+
-        '<div class="client-name">'+escapeHtml(v.client)+'</div>'+
+        '<div class="individual-name">'+escapeHtml(v.individual)+'</div>'+
         '<div class="arrival-line">Arrived '+formatTime(v.arrival)+'</div>'+
         '<div class="ring"><div><div class="time" id="liveElapsed">'+formatElapsed(Date.now()-v.arrival)+'</div><div class="time-lbl">Elapsed</div></div></div>'+
       '</div>'+
@@ -1062,7 +1062,7 @@
     var tasksDone = v.tasks.filter(function(t){return t.done;});
     var html = '<button class="close-x" id="closeSheetBtn">✕</button>'+
       '<div class="sheet-handle"></div>'+
-      '<h2>'+escapeHtml(v.client)+'</h2>'+
+      '<h2>'+escapeHtml(v.individual)+'</h2>'+
       '<div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">'+groupLabel(localDateKey(v.arrival))+'</div>'+
       '<div class="card" style="margin-bottom:12px;">'+
         '<div class="detail-row"><div class="k">Arrival</div><div class="v">'+formatTime(v.arrival)+'</div></div>'+
@@ -1136,7 +1136,7 @@
     var monthLabel = new Date(monthKey+"-15T12:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
     var totalMs = visits.reduce(function(s,v){ return s + ((v.departure||Date.now())-v.arrival); },0);
 
-    var html = '<div class="print-title">Client Visit Log \u2014 '+escapeHtml(monthLabel)+'</div>'+
+    var html = '<div class="print-title">Individual Visit Log \u2014 '+escapeHtml(monthLabel)+'</div>'+
       '<div class="print-sub">'+visits.length+' visit'+(visits.length===1?'':'s')+' &middot; total time '+formatDuration(totalMs)+' &middot; generated '+new Date().toLocaleDateString()+'</div>';
 
     visits.forEach(function(v){
@@ -1145,7 +1145,7 @@
       var timeLabel = formatTime(v.arrival) + '\u2013' + (v.departure ? formatTime(v.departure) : 'in progress') +
         (v.departure ? ' (' + formatDuration(v.departure - v.arrival) + ')' : '');
       html += '<div class="print-visit">'+
-        '<h3>'+escapeHtml(v.client)+'</h3>'+
+        '<h3>'+escapeHtml(v.individual)+'</h3>'+
         '<div class="print-meta">'+dateLabel+' &middot; '+timeLabel+'</div>'+
         (doneTasks.length ? '<div class="print-label">Tasks completed</div><div class="print-tasks">'+doneTasks.map(function(t){ return escapeHtml(t.label); }).join(', ')+'</div>' : '')+
         '<div class="print-label">Notes</div><div class="print-notes">'+(v.notes ? escapeHtml(v.notes) : '\u2014')+'</div>'+
