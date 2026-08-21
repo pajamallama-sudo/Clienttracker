@@ -225,6 +225,7 @@
     background:var(--primary-soft);padding:3px 9px;border-radius:20px;flex:0 0 auto;
   }
   .duration-pill.live{color:#8A5A12;background:var(--amber-soft);}
+  .duration-pill.live.stale{color:#fff;background:var(--danger);}
   .chev{stroke:var(--faint);flex:0 0 auto;}
 
   .empty-state{
@@ -287,7 +288,7 @@
 
   /* active visit card */
   .live-card{
-    background:linear-gradient(160deg,#0F6B64,#0A4F4B);
+    background:linear-gradient(160deg,var(--primary),var(--primary-dark));
     border-radius:var(--radius-lg);
     padding:22px 20px;
     color:#fff;
@@ -310,9 +311,21 @@
     border:6px solid transparent;border-top-color:#fff;border-right-color:#fff;
     animation:spin 3.2s linear infinite;
   }
+  .ring.warn::after{border-top-color:var(--amber);border-right-color:var(--amber);}
+  .ring.stale::after{border-top-color:var(--danger);border-right-color:var(--danger);}
   @keyframes spin{to{transform:rotate(360deg);}}
   .ring .time{font-size:26px;font-weight:800;letter-spacing:0.5px;}
   .ring .time-lbl{font-size:10.5px;opacity:0.7;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .visit-alert{
+    font-size:12px;font-weight:600;border-radius:12px;padding:9px 12px;margin-top:14px;
+    display:flex;flex-direction:column;gap:6px;text-align:left;
+  }
+  .visit-alert.warn{background:rgba(232,163,61,0.18);color:#fff;}
+  .visit-alert.stale{background:rgba(255,255,255,0.16);color:#fff;}
+  .visit-alert .end-now-btn{
+    align-self:flex-start;background:#fff;color:var(--primary-dark);border:none;
+    border-radius:20px;padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;
+  }
 
   .card{
     background:var(--surface);
@@ -689,6 +702,97 @@
     render();
   }
 
+  // ---------- full backup / restore ----------
+  // A separate thing from the monthly PDF: that's a document meant to be
+  // read: this is a data file meant to be loaded back into the app. It's
+  // the actual answer to "what if this phone is lost" -- the PDF alone
+  // can't reconstruct the working app state.
+  function exportBackup(){
+    var payload = {
+      app: "visit-log-backup",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      visits: state.visits,
+      templates: state.templates,
+      theme: state.theme
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "visit-log-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function handleRestoreFile(file){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var data;
+      try{ data = JSON.parse(e.target.result); }
+      catch(err){ openRestoreError("That file isn't valid — couldn't read it as a backup."); return; }
+      if(!data || !Array.isArray(data.visits) || !data.templates || !Array.isArray(data.templates.tasks)){
+        openRestoreError("That doesn't look like a Visit Log backup file.");
+        return;
+      }
+      openRestoreConfirm(data);
+    };
+    reader.onerror = function(){ openRestoreError("Couldn't read that file."); };
+    reader.readAsText(file);
+  }
+
+  function openRestoreError(message){
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>Restore backup</h2>'+
+      '<div class="banner" style="margin-top:14px;"><span>'+escapeHtml(message)+'</span></div>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+  }
+
+  function openRestoreConfirm(data){
+    var exportedLabel = data.exportedAt ? new Date(data.exportedAt).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "unknown date";
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>Restore this backup?</h2>'+
+      '<div class="card" style="margin-top:14px;">'+
+        '<div class="detail-row"><div class="k">Backup from</div><div class="v">'+exportedLabel+'</div></div>'+
+        '<div class="detail-row"><div class="k">Visits in backup</div><div class="v">'+data.visits.length+'</div></div>'+
+        '<div class="detail-row" style="border-bottom:none;"><div class="k">Currently on this phone</div><div class="v">'+state.visits.length+'</div></div>'+
+      '</div>'+
+      '<div class="hint" style="margin:10px 0 16px;">This replaces everything currently on this phone with what\'s in the backup. It can\'t be undone — export a backup of what\'s here first if you want to keep it too.</div>'+
+      '<button class="btn btn-danger btn-block" id="confirmRestoreBtn">Replace with backup</button>'+
+      '<button class="btn btn-ghost btn-block" id="cancelRestoreBtn" style="margin-top:8px;">Cancel</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("cancelRestoreBtn").addEventListener("click", closeSheet);
+    document.getElementById("confirmRestoreBtn").addEventListener("click", function(){ applyRestore(data); });
+  }
+
+  function applyRestore(data){
+    state.visits = Array.isArray(data.visits) ? data.visits : [];
+    if(data.templates && Array.isArray(data.templates.tasks) && data.templates.phrases){
+      state.templates = data.templates;
+    }
+    saveVisits();
+    saveTemplates();
+    if(data.theme && THEMES[data.theme]){
+      applyTheme(data.theme);
+      saveTheme(data.theme);
+      state.theme = data.theme;
+    }
+    var active = state.visits.find(function(x){ return x.status === "active"; });
+    state.activeId = active ? active.id : null;
+    closeSheet();
+    state.tab = "visits";
+    render();
+    if(state.activeId) startTicking();
+  }
+
   function reorderTemplateArray(arr, oldIdx, newIdx){
     var item = arr.splice(oldIdx,1)[0];
     arr.splice(newIdx,0,item);
@@ -777,11 +881,73 @@
       if(!v){ stopTicking(); return; }
       var el = document.getElementById("liveElapsed");
       if(el) el.textContent = formatElapsed(Date.now()-v.arrival);
-      var dots = document.querySelectorAll(".dot-live");
+      updateVisitAlertUI(v);
     }, 1000);
   }
   function stopTicking(){
     if(timerHandle){ clearInterval(timerHandle); timerHandle=null; }
+  }
+
+  // A visit left open for hours is far more likely to be a forgotten
+  // End Visit tap than a genuinely long visit -- this just makes that
+  // state visible instead of the timer quietly running all day.
+  var VISIT_WARN_MS = 3*60*60*1000;   // 3 hours
+  var VISIT_STALE_MS = 8*60*60*1000;  // 8 hours
+
+  function getVisitAlertLevel(v){
+    var ms = Date.now() - v.arrival;
+    if(ms >= VISIT_STALE_MS) return "stale";
+    if(ms >= VISIT_WARN_MS) return "warn";
+    return "normal";
+  }
+
+  function visitAlertHtml(level, v){
+    if(level === "stale"){
+      return '<div class="visit-alert stale">'+
+        '<span>Still open since '+formatTime(v.arrival)+' — looks like End Visit might have been missed.</span>'+
+        '<button class="end-now-btn" id="alertEndBtn">End visit now</button>'+
+        '</div>';
+    }
+    if(level === "warn"){
+      return '<div class="visit-alert warn"><span>This is a long one — still going?</span></div>';
+    }
+    return "";
+  }
+
+  // Called every tick so the ring color / banner update live without a
+  // full re-render (which would fight the running timer text).
+  function updateVisitAlertUI(v){
+    var level = getVisitAlertLevel(v);
+    var ring = document.querySelector(".ring");
+    if(ring) ring.className = "ring" + (level!=="normal" ? " "+level : "");
+    var existing = document.querySelector(".visit-alert");
+    var wantsAlert = level !== "normal";
+    if(!wantsAlert && existing){ existing.remove(); return; }
+    if(wantsAlert){
+      var html = visitAlertHtml(level, v);
+      if(existing){
+        if(existing.dataset.level !== level){
+          var wrap = document.createElement("div");
+          wrap.innerHTML = html;
+          var fresh = wrap.firstChild;
+          fresh.dataset.level = level;
+          existing.replaceWith(fresh);
+          bindAlertEndBtn();
+        }
+      } else {
+        var card = document.querySelector(".live-card");
+        if(card){
+          card.insertAdjacentHTML("beforeend", html);
+          var el = card.querySelector(".visit-alert");
+          if(el) el.dataset.level = level;
+          bindAlertEndBtn();
+        }
+      }
+    }
+  }
+  function bindAlertEndBtn(){
+    var btn = document.getElementById("alertEndBtn");
+    if(btn) btn.addEventListener("click", endVisit);
   }
 
   // ---------- rendering ----------
@@ -855,11 +1021,12 @@
       html += '<div class="visit-list">';
       groups[k].forEach(function(v){
         var isLive = v.status==="active";
+        var liveLevel = isLive ? getVisitAlertLevel(v) : "normal";
         var timeRange = isLive
           ? formatTime(v.arrival)+' – now'
           : formatTime(v.arrival)+' – '+formatTime(v.departure);
         var pill = isLive
-          ? '<span class="duration-pill live">In progress</span>'
+          ? '<span class="duration-pill live'+(liveLevel==="stale"?" stale":"")+'">'+(liveLevel==="stale"?"Still open":"In progress")+'</span>'
           : '<span class="duration-pill">'+formatDuration(v.departure-v.arrival)+'</span>';
         html += '<div class="visit-row" data-id="'+v.id+'">'+
           '<div class="avatar">'+initials(v.individual)+'</div>'+
@@ -939,10 +1106,14 @@
       return '<div class="phrase-cat-label">'+escapeHtml(cat)+'</div><div class="phrase-scroll">'+chips+'</div>';
     }).join("");
 
+    var alertLevel = getVisitAlertLevel(v);
+    var ringClass = "ring" + (alertLevel!=="normal" ? " "+alertLevel : "");
+
     var html = '<div class="live-card">'+
         '<div class="individual-name">'+escapeHtml(v.individual)+'</div>'+
         '<div class="arrival-line">Arrived '+formatTime(v.arrival)+'</div>'+
-        '<div class="ring"><div><div class="time" id="liveElapsed">'+formatElapsed(Date.now()-v.arrival)+'</div><div class="time-lbl">Elapsed</div></div></div>'+
+        '<div class="'+ringClass+'"><div><div class="time" id="liveElapsed">'+formatElapsed(Date.now()-v.arrival)+'</div><div class="time-lbl">Elapsed</div></div></div>'+
+        visitAlertHtml(alertLevel, v)+
       '</div>'+
       '<div class="card"><h4>Tasks completed</h4>'+tasksHtml+'</div>'+
       '<div class="card">'+
@@ -954,6 +1125,9 @@
       '<button class="btn btn-sage btn-block" id="endBtn">End Visit &amp; Save</button>';
 
     content.innerHTML = html;
+    var initialAlertEl = content.querySelector(".visit-alert");
+    if(initialAlertEl) initialAlertEl.dataset.level = alertLevel;
+    bindAlertEndBtn();
 
     content.querySelectorAll(".task-check").forEach(function(el){
       el.addEventListener("click", function(){ toggleTask(el.dataset.id); });
@@ -1014,6 +1188,12 @@
         '</div>';
     });
 
+    html += '<div class="section-label" style="margin-top:14px;">Backup &amp; Restore</div>'+
+      '<div class="hint" style="margin-top:-4px;">The monthly export makes a document to keep. This makes a file that can put everything back — every visit, task, and phrase — on this phone or a new one.</div>'+
+      '<button class="btn btn-primary btn-block" id="exportBackupBtn" style="margin-bottom:8px;">Export full backup</button>'+
+      '<button class="btn btn-ghost btn-block" id="restoreBackupBtn">Restore from backup</button>'+
+      '<input type="file" id="restoreFileInput" accept="application/json,.json" style="display:none;">';
+
     content.innerHTML = html;
 
     content.querySelectorAll("[data-theme]").forEach(function(btn){
@@ -1056,6 +1236,16 @@
       var cat = el.dataset.reorderCat;
       makeReorderable(el, function(oldIdx, newIdx){ reorderTemplateArray(state.templates.phrases[cat], oldIdx, newIdx); });
     });
+
+    document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
+    var restoreInput = document.getElementById("restoreFileInput");
+    document.getElementById("restoreBackupBtn").addEventListener("click", function(){ restoreInput.click(); });
+    restoreInput.addEventListener("change", function(){
+      if(restoreInput.files && restoreInput.files[0]){
+        handleRestoreFile(restoreInput.files[0]);
+      }
+      restoreInput.value = "";
+    });
   }
 
   // ---------- sheet (visit detail) ----------
@@ -1064,10 +1254,12 @@
 
   function openVisitDetail(v){
     var tasksDone = v.tasks.filter(function(t){return t.done;});
+    var editedLine = v.editedAt ? '<div class="hint" style="margin:-8px 0 12px;">Edited '+new Date(v.editedAt).toLocaleDateString(undefined,{month:"short",day:"numeric"})+' at '+formatTime(v.editedAt)+'</div>' : '';
     var html = '<button class="close-x" id="closeSheetBtn">✕</button>'+
       '<div class="sheet-handle"></div>'+
       '<h2>'+escapeHtml(v.individual)+'</h2>'+
-      '<div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">'+groupLabel(localDateKey(v.arrival))+'</div>'+
+      '<div style="font-size:12.5px;color:var(--muted);margin-bottom:6px;">'+groupLabel(localDateKey(v.arrival))+'</div>'+
+      editedLine+
       '<div class="card" style="margin-bottom:12px;">'+
         '<div class="detail-row"><div class="k">Arrival</div><div class="v">'+formatTime(v.arrival)+'</div></div>'+
         '<div class="detail-row"><div class="k">Departure</div><div class="v">'+formatTime(v.departure)+'</div></div>'+
@@ -1075,6 +1267,7 @@
       '</div>'+
       (tasksDone.length ? '<div class="card"><h4>Tasks completed</h4>'+tasksDone.map(function(t){return '<div class="task-row"><div class="task-check done">'+icon("check")+'</div><div class="task-label">'+escapeHtml(t.label)+'</div></div>';}).join("")+'</div>' : '')+
       '<div class="card"><h4>Progress notes</h4><div style="font-size:14px;line-height:1.5;color:var(--ink);">'+(v.notes ? escapeHtml(v.notes) : '<span style="color:var(--muted);">No notes recorded.</span>')+'</div></div>'+
+      '<button class="btn btn-ghost btn-block" id="editVisitBtn" style="margin-bottom:8px;">Edit visit</button>'+
       '<div id="deleteZone">'+
         '<button class="btn btn-danger btn-block" id="askDeleteBtn">Delete visit</button>'+
       '</div>';
@@ -1082,6 +1275,7 @@
     sheetOverlay.classList.add("open");
 
     document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("editVisitBtn").addEventListener("click", function(){ openEditVisit(v); });
     document.getElementById("askDeleteBtn").addEventListener("click", function(){
       document.getElementById("deleteZone").innerHTML =
         '<div class="confirm-row">'+
@@ -1091,6 +1285,81 @@
       document.getElementById("cancelDel").addEventListener("click", function(){ openVisitDetail(v); });
       document.getElementById("confirmDel").addEventListener("click", function(){ deleteVisit(v.id); });
     });
+  }
+
+  // Editing is scoped to name / tasks / notes -- not arrival or departure.
+  // Those stay as the factual record of when the visit actually happened;
+  // everything editable here is corrective (a missed checkbox, a typo, a
+  // detail you forgot to add), and every save stamps an "Edited" time on
+  // the visit so the record stays honest that a change happened after the
+  // fact, rather than silently rewriting history.
+  function openEditVisit(v){
+    var draft = {
+      individual: v.individual,
+      notes: v.notes,
+      tasks: v.tasks.map(function(t){ return { id:t.id, label:t.label, done:t.done }; })
+    };
+
+    function renderEdit(){
+      var tasksHtml = draft.tasks.map(function(t){
+        return '<div class="task-row">'+
+          '<div class="task-check '+(t.done?"done":"")+'" data-id="'+t.id+'">'+icon("check")+'</div>'+
+          '<div class="task-label '+(t.done?"done":"")+'">'+escapeHtml(t.label)+'</div>'+
+        '</div>';
+      }).join("");
+
+      var phrasesHtml = Object.keys(state.templates.phrases).map(function(cat){
+        var chips = state.templates.phrases[cat].map(function(p){
+          return '<div class="phrase-chip" data-text="'+escapeAttr(p.phrase)+'">'+escapeHtml(truncate(p.title,26))+'</div>';
+        }).join("");
+        return '<div class="phrase-cat-label">'+escapeHtml(cat)+'</div><div class="phrase-scroll">'+chips+'</div>';
+      }).join("");
+
+      sheetBody.innerHTML =
+        '<button class="close-x" id="closeSheetBtn">✕</button>'+
+        '<div class="sheet-handle"></div>'+
+        '<h2>Edit Visit</h2>'+
+        '<div class="hint" style="margin:6px 0 14px;">Saving will mark this visit as edited, with the time, so the record stays clear about what changed after the fact.</div>'+
+        '<input class="field" id="editIndividualName" value="'+escapeAttr(draft.individual)+'" placeholder="Name">'+
+        '<div class="card"><h4>Tasks completed</h4>'+(tasksHtml||'<div class="hint" style="margin:0;">No tasks on this visit.</div>')+'</div>'+
+        '<div class="card">'+
+          '<h4>Progress notes</h4>'+
+          phrasesHtml+
+          '<textarea class="field" id="editNotesArea" placeholder="What happened at this visit?">'+escapeHtml(draft.notes)+'</textarea>'+
+        '</div>'+
+        '<button class="btn btn-primary btn-block" id="saveEditBtn">Save changes</button>'+
+        '<button class="btn btn-ghost btn-block" id="cancelEditBtn" style="margin-top:8px;">Cancel</button>';
+
+      document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+      sheetBody.querySelectorAll(".task-check").forEach(function(el){
+        el.addEventListener("click", function(){
+          var t = draft.tasks.find(function(x){ return x.id===el.dataset.id; });
+          if(t){ t.done = !t.done; renderEdit(); }
+        });
+      });
+      sheetBody.querySelectorAll(".phrase-chip").forEach(function(el){
+        el.addEventListener("click", function(){
+          var ta = document.getElementById("editNotesArea");
+          ta.value = joinNote(ta.value, el.dataset.text);
+          draft.notes = ta.value;
+          ta.focus();
+        });
+      });
+      document.getElementById("editNotesArea").addEventListener("input", function(e){ draft.notes = e.target.value; });
+      document.getElementById("editIndividualName").addEventListener("input", function(e){ draft.individual = e.target.value; });
+      document.getElementById("cancelEditBtn").addEventListener("click", function(){ openVisitDetail(v); });
+      document.getElementById("saveEditBtn").addEventListener("click", function(){
+        var name = (document.getElementById("editIndividualName").value||"").trim();
+        if(!name) return;
+        v.individual = name;
+        v.notes = draft.notes;
+        v.tasks = draft.tasks;
+        v.editedAt = Date.now();
+        saveVisits();
+        openVisitDetail(v);
+      });
+    }
+    renderEdit();
   }
 
   function closeSheet(){
@@ -1147,7 +1416,8 @@
       var doneTasks = v.tasks.filter(function(t){ return t.done; });
       var dateLabel = new Date(v.arrival).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
       var timeLabel = formatTime(v.arrival) + '\u2013' + (v.departure ? formatTime(v.departure) : 'in progress') +
-        (v.departure ? ' (' + formatDuration(v.departure - v.arrival) + ')' : '');
+        (v.departure ? ' (' + formatDuration(v.departure - v.arrival) + ')' : '') +
+        (v.editedAt ? ' \u00b7 edited' : '');
       html += '<div class="print-visit">'+
         '<h3>'+escapeHtml(v.individual)+'</h3>'+
         '<div class="print-meta">'+dateLabel+' &middot; '+timeLabel+'</div>'+
