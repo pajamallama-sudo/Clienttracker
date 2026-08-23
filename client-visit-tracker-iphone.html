@@ -360,6 +360,9 @@
     text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .phrase-chip:active{background:var(--primary-soft);}
+  .phrase-chip.used{background:var(--primary-soft);color:var(--primary-dark);border-color:var(--primary);}
+  @keyframes justAddedFade{0%{background:var(--primary-soft);}100%{background:transparent;}}
+  .lib-row.just-added{animation:justAddedFade 1.8s ease-out forwards;}
 
   /* library rows */
   .lib-row{
@@ -374,6 +377,12 @@
   .add-phrase-form .field{margin-bottom:8px;}
   .add-phrase-form .field:last-of-type{margin-bottom:10px;}
   .drag-handle{flex:0 0 auto;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--faint);touch-action:none;cursor:grab;}
+  .lib-row-editing{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface-alt);}
+  .lib-row-phrase-edit{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface-alt);}
+  .icon-btn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .icon-btn svg{width:15px;height:15px;}
+  .icon-btn.save{background:var(--sage);color:#fff;}
+  .icon-btn.cancel{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
   .lib-row.dragging{position:relative;z-index:50;background:var(--surface-alt);box-shadow:0 8px 20px rgba(28,43,51,0.16);border-radius:var(--radius-sm);}
   .theme-swatches{display:flex;gap:14px;margin-bottom:20px;}
   .theme-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;padding:0;cursor:pointer;}
@@ -550,7 +559,9 @@
     templates: JSON.parse(JSON.stringify(defaultTemplates)),
     tab: "visits",
     loaded: false,
-    theme: applyTheme(getSavedTheme())
+    theme: applyTheme(getSavedTheme()),
+    editingTask: null,
+    editingPhrase: null
   };
 
   var timerHandle = null;
@@ -637,6 +648,7 @@
   function startVisit(individualName){
     individualName = individualName.trim();
     if(!individualName) return;
+    usedPhrasesThisVisit = {};
     var v = {
       id: uid(),
       individual: individualName,
@@ -691,8 +703,15 @@
     if(!ta) return;
     ta.value = joinNote(ta.value, text);
     updateNotes(ta.value);
-    ta.focus();
     ta.selectionStart = ta.selectionEnd = ta.value.length;
+    markPhraseUsed(text);
+  }
+
+  var usedPhrasesThisVisit = {};
+  function markPhraseUsed(text){
+    usedPhrasesThisVisit[text] = true;
+    var chip = document.querySelector('.phrase-chip[data-text="'+CSS.escape(text)+'"]');
+    if(chip) chip.classList.add("used");
   }
 
   function deleteVisit(id){
@@ -850,13 +869,18 @@
     });
   }
 
+  var justAddedTaskIdx = null;
+  var justAddedPhrase = null;
+
   function addTemplateItem(kind, value, category){
     value = value.trim();
     if(!value) return;
     var arr = category ? state.templates[kind][category] : state.templates[kind];
     arr.push(value);
+    if(kind === "tasks") justAddedTaskIdx = arr.length - 1;
     saveTemplates();
     render();
+    scrollJustAddedIntoView();
   }
   function addPhraseItem(category, title, phrase){
     title = (title||"").trim();
@@ -864,8 +888,22 @@
     if(!title || !phrase) return;
     if(!state.templates.phrases[category]) state.templates.phrases[category] = [];
     state.templates.phrases[category].push({title: title, phrase: phrase});
+    justAddedPhrase = { cat: category, idx: state.templates.phrases[category].length - 1 };
     saveTemplates();
     render();
+    scrollJustAddedIntoView();
+  }
+  // The keyboard closing after the input is destroyed by the re-render is
+  // what actually caused the jump to the bottom -- Safari resizes the
+  // viewport mid-swap with nowhere predictable to land. Blurring the input
+  // first (see the click handlers below) settles that resize before we
+  // touch the DOM; this then takes over final positioning explicitly
+  // instead of leaving it to whatever the browser lands on.
+  function scrollJustAddedIntoView(){
+    requestAnimationFrame(function(){
+      var el = document.querySelector(".just-added");
+      if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+    });
   }
   function removeTemplateItem(kind, index, category){
     var arr = category ? state.templates[kind][category] : state.templates[kind];
@@ -960,22 +998,29 @@
       chev: '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
       check: '<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
       trash: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 7"/></svg>',
-      clipboard: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A4F4B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>'
+      clipboard: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A4F4B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+      edit: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+      x: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
     };
     return map[name] || "";
   }
 
+  var lastRenderedTab = null;
   function render(){
     if(!state.loaded){
       content.innerHTML = '<div class="empty-state"><p>Loading your visits…</p></div>';
       return;
     }
+    var sameTab = state.tab === lastRenderedTab;
+    var savedScroll = (content && sameTab) ? content.scrollTop : 0;
     document.querySelectorAll(".tab").forEach(function(b){
       b.classList.toggle("active", b.dataset.tab===state.tab);
     });
     if(state.tab==="visits") renderVisitsTab();
     else if(state.tab==="checkin") renderCheckinTab();
     else renderLibraryTab();
+    if(content) content.scrollTop = savedScroll;
+    lastRenderedTab = state.tab;
   }
 
   function renderVisitsTab(){
@@ -1101,7 +1146,8 @@
 
     var phrasesHtml = Object.keys(state.templates.phrases).map(function(cat){
       var chips = state.templates.phrases[cat].map(function(p){
-        return '<div class="phrase-chip" data-text="'+escapeAttr(p.phrase)+'">'+escapeHtml(truncate(p.title,26))+'</div>';
+        var used = usedPhrasesThisVisit[p.phrase] ? " used" : "";
+        return '<div class="phrase-chip'+used+'" data-text="'+escapeAttr(p.phrase)+'">'+escapeHtml(truncate(p.title,26))+'</div>';
       }).join("");
       return '<div class="phrase-cat-label">'+escapeHtml(cat)+'</div><div class="phrase-scroll">'+chips+'</div>';
     }).join("");
@@ -1156,27 +1202,47 @@
       '<div class="theme-swatches">'+swatches+'</div>';
 
     var taskRows = state.templates.tasks.map(function(it, idx){
-      return '<div class="lib-row"><div class="drag-handle">'+dragIcon+'</div><div class="txt">'+escapeHtml(truncate(it,60))+'</div>'+
+      if(state.editingTask === idx){
+        return '<div class="lib-row lib-row-editing">'+
+          '<input class="field" id="editTaskField" value="'+escapeAttr(it)+'" style="margin:0;flex:1;">'+
+          '<button class="icon-btn cancel" data-cancel-task="1" title="Cancel">'+icon("x")+'</button>'+
+          '<button class="icon-btn save" data-save-task="'+idx+'" title="Save">'+icon("check")+'</button>'+
+        '</div>';
+      }
+      return '<div class="lib-row'+(justAddedTaskIdx===idx?' just-added':'')+'"><div class="drag-handle">'+dragIcon+'</div><div class="txt">'+escapeHtml(truncate(it,60))+'</div>'+
+        '<button data-edit-task="'+idx+'" class="rm-btn">'+icon("edit")+'</button>'+
         '<button data-kind="tasks" data-idx="'+idx+'" class="rm-btn">'+icon("trash")+'</button></div>';
     }).join("");
+    justAddedTaskIdx = null;
 
     html += '<div class="section-label">Task checklist</div>'+
-      '<div class="hint" style="margin-top:-4px;">Shown as tap-to-complete items on every new visit. Drag the handle to reorder.</div>'+
+      '<div class="hint" style="margin-top:-4px;">Shown as tap-to-complete items on every new visit. Drag the handle to reorder, the pencil to rename.</div>'+
       '<div class="add-row"><input class="field" id="add-tasks" placeholder="Add new…"><button class="btn btn-primary" data-add="tasks" data-target="add-tasks">Add</button></div>'+
       '<div class="visit-list" style="margin-bottom:6px;" data-reorder-list="tasks">'+(taskRows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>';
 
     html += '<div class="section-label">Quick phrases</div>';
-    html += '<div class="hint" style="margin-top:-4px;">Each has a short title (what you\'ll see when picking) and a full phrase (what actually goes in the note) — different outcomes, not restatements of the same one. Drag the handle to reorder.</div>';
+    html += '<div class="hint" style="margin-top:-4px;">Each has a short title (what you\'ll see when picking) and a full phrase (what actually goes in the note) — different outcomes, not restatements of the same one. Drag the handle to reorder, the pencil to edit.</div>';
 
     Object.keys(state.templates.phrases).forEach(function(cat){
       var items = state.templates.phrases[cat] || [];
       var safeCat = cat.replace(/\s+/g,'');
       var rows = items.map(function(p, idx){
-        return '<div class="lib-row lib-row-phrase"><div class="drag-handle">'+dragIcon+'</div>'+
+        if(state.editingPhrase && state.editingPhrase.cat === cat && state.editingPhrase.idx === idx){
+          return '<div class="lib-row-phrase-edit">'+
+            '<input class="field" id="editPhraseTitleField" value="'+escapeAttr(p.title)+'" placeholder="Short title" style="margin:0 0 8px;">'+
+            '<input class="field" id="editPhraseTextField" value="'+escapeAttr(p.phrase)+'" placeholder="Full phrase" style="margin:0 0 10px;">'+
+            '<div style="display:flex;gap:8px;">'+
+              '<button class="btn btn-ghost" data-cancel-phrase="1" style="flex:1;">Cancel</button>'+
+              '<button class="btn btn-primary" data-save-phrase="'+cat+'|'+idx+'" style="flex:1;">Save</button>'+
+            '</div>'+
+          '</div>';
+        }
+        return '<div class="lib-row lib-row-phrase'+(justAddedPhrase && justAddedPhrase.cat===cat && justAddedPhrase.idx===idx ? ' just-added' : '')+'"><div class="drag-handle">'+dragIcon+'</div>'+
           '<div class="txt">'+
             '<div class="phrase-title-lbl">'+escapeHtml(p.title)+'</div>'+
             '<div class="phrase-full-txt">'+escapeHtml(truncate(p.phrase,72))+'</div>'+
           '</div>'+
+          '<button data-edit-phrase="'+cat+'|'+idx+'" class="rm-btn">'+icon("edit")+'</button>'+
           '<button data-kind="phrases" data-idx="'+idx+'" data-cat="'+escapeAttr(cat)+'" class="rm-btn">'+icon("trash")+'</button></div>';
       }).join("");
       html += '<div class="section-label" style="margin-top:14px;">'+escapeHtml(cat)+'</div>'+
@@ -1187,6 +1253,7 @@
           '<button class="btn btn-ghost btn-block" data-add-phrase-cat="'+escapeAttr(cat)+'" data-safe-cat="'+safeCat+'">+ Add phrase</button>'+
         '</div>';
     });
+    justAddedPhrase = null;
 
     html += '<div class="section-label" style="margin-top:14px;">Backup &amp; Restore</div>'+
       '<div class="hint" style="margin-top:-4px;">The monthly export makes a document to keep. This makes a file that can put everything back — every visit, task, and phrase — on this phone or a new one.</div>'+
@@ -1211,8 +1278,9 @@
         var kind = btn.dataset.add;
         var cat = btn.dataset.cat;
         var input = document.getElementById(btn.dataset.target);
-        addTemplateItem(kind, input.value, cat);
-        input.value = "";
+        var value = input.value;
+        input.blur();
+        addTemplateItem(kind, value, cat);
       });
     });
     content.querySelectorAll("[data-add-phrase-cat]").forEach(function(btn){
@@ -1221,12 +1289,60 @@
         var safeCat = btn.dataset.safeCat;
         var titleInput = document.getElementById("addTitle-"+safeCat);
         var textInput = document.getElementById("addText-"+safeCat);
-        addPhraseItem(cat, titleInput.value, textInput.value);
+        var title = titleInput.value, text = textInput.value;
+        titleInput.blur();
+        textInput.blur();
+        addPhraseItem(cat, title, text);
       });
     });
-    content.querySelectorAll(".rm-btn").forEach(function(btn){
+    content.querySelectorAll(".rm-btn[data-kind]").forEach(function(btn){
       btn.addEventListener("click", function(){
         removeTemplateItem(btn.dataset.kind, parseInt(btn.dataset.idx,10), btn.dataset.cat);
+      });
+    });
+    content.querySelectorAll("[data-edit-task]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        state.editingTask = parseInt(btn.dataset.editTask,10);
+        state.editingPhrase = null;
+        render();
+      });
+    });
+    content.querySelectorAll("[data-cancel-task]").forEach(function(btn){
+      btn.addEventListener("click", function(){ state.editingTask = null; render(); });
+    });
+    content.querySelectorAll("[data-save-task]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var idx = parseInt(btn.dataset.saveTask,10);
+        var val = (document.getElementById("editTaskField").value||"").trim();
+        if(!val) return;
+        state.templates.tasks[idx] = val;
+        state.editingTask = null;
+        saveTemplates();
+        render();
+      });
+    });
+    content.querySelectorAll("[data-edit-phrase]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var parts = btn.dataset.editPhrase.split("|");
+        state.editingPhrase = { cat: parts[0], idx: parseInt(parts[1],10) };
+        state.editingTask = null;
+        render();
+      });
+    });
+    content.querySelectorAll("[data-cancel-phrase]").forEach(function(btn){
+      btn.addEventListener("click", function(){ state.editingPhrase = null; render(); });
+    });
+    content.querySelectorAll("[data-save-phrase]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var parts = btn.dataset.savePhrase.split("|");
+        var cat = parts[0], idx = parseInt(parts[1],10);
+        var title = (document.getElementById("editPhraseTitleField").value||"").trim();
+        var text = (document.getElementById("editPhraseTextField").value||"").trim();
+        if(!title || !text) return;
+        state.templates.phrases[cat][idx] = { title: title, phrase: text };
+        state.editingPhrase = null;
+        saveTemplates();
+        render();
       });
     });
     content.querySelectorAll('[data-reorder-list="tasks"]').forEach(function(el){
