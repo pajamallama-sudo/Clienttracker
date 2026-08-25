@@ -374,6 +374,7 @@
   .phrase-title-lbl{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .phrase-full-txt{font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .add-phrase-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;margin-bottom:14px;}
+  .cat-header{display:flex;align-items:center;gap:2px;}
   .add-phrase-form .field{margin-bottom:8px;}
   .add-phrase-form .field:last-of-type{margin-bottom:10px;}
   .drag-handle{flex:0 0 auto;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--faint);touch-action:none;cursor:grab;}
@@ -392,6 +393,22 @@
   .add-row{display:flex;gap:8px;margin-bottom:14px;}
   .add-row .field{margin-bottom:0;}
   .add-row .btn{flex:0 0 auto;padding:12px 16px;}
+
+  /* lock screen */
+  .lock-screen{
+    position:absolute;top:44px;left:0;right:0;bottom:0;
+    background:var(--bg);z-index:40;display:none;
+    align-items:center;justify-content:center;padding:24px;
+  }
+  .lock-screen.open{display:flex;}
+  .lock-card{width:100%;max-width:300px;}
+  .auth-title{font-weight:800;font-size:20px;text-align:center;color:var(--ink);}
+  .auth-sub{font-size:12.5px;color:var(--muted);text-align:center;margin:4px 0 20px;}
+  .auth-error{
+    font-size:12.5px;color:var(--danger);background:var(--danger-soft);
+    border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:10px;display:none;
+  }
+  .auth-error.show{display:block;}
 
   /* sheet modal */
   .sheet-overlay{
@@ -452,6 +469,19 @@
         </div>
       </div>
 
+      <div class="lock-screen" id="lockScreen">
+        <div class="lock-card">
+          <div class="pin-icon" style="margin:0 auto 14px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <div class="auth-title">Enter PIN</div>
+          <div class="auth-sub" id="lockSub">Visit Log is locked</div>
+          <div class="auth-error" id="lockError"></div>
+          <input class="field" id="lockPinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="8" placeholder="PIN" style="text-align:center;letter-spacing:6px;font-size:20px;">
+          <button class="btn btn-primary btn-block" id="lockSubmitBtn">Unlock</button>
+        </div>
+      </div>
+
       <div class="navbar" id="navbar">
         <h1 id="navTitle">Visits</h1>
         <div class="sub" id="navSub">Your individual visit history</div>
@@ -471,6 +501,10 @@
         <button class="tab" data-tab="library">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5v-13Z"/></svg>
           Library
+        </button>
+        <button class="tab" data-tab="trends">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M11 19V4M18 19v-7"/></svg>
+          Trends
         </button>
       </div>
 
@@ -561,7 +595,8 @@
     loaded: false,
     theme: applyTheme(getSavedTheme()),
     editingTask: null,
-    editingPhrase: null
+    editingPhrase: null,
+    visitSearch: ""
   };
 
   var timerHandle = null;
@@ -1018,7 +1053,8 @@
     });
     if(state.tab==="visits") renderVisitsTab();
     else if(state.tab==="checkin") renderCheckinTab();
-    else renderLibraryTab();
+    else if(state.tab==="library") renderLibraryTab();
+    else renderTrendsTab();
     if(content) content.scrollTop = savedScroll;
     lastRenderedTab = state.tab;
   }
@@ -1051,16 +1087,50 @@
       return;
     }
 
+    html += '<input class="field" id="visitSearchInput" placeholder="Search by name" value="'+escapeAttr(state.visitSearch||"")+'" autocomplete="off" autocapitalize="words" style="margin-bottom:10px;">';
     html += '<button class="btn btn-ghost btn-block" id="exportBtn" style="margin-bottom:16px;">Export monthly report</button>';
+    html += '<div id="visitsListArea"></div>';
+
+    content.innerHTML = html;
+
+    // Search filters into its own sub-container instead of the whole tab,
+    // so typing never rebuilds (and never steals focus from) the input
+    // itself -- that full-tab-rebuild-per-keystroke was exactly what
+    // caused the keyboard/scroll jump bug fixed earlier for Library.
+    var searchInput = document.getElementById("visitSearchInput");
+    searchInput.addEventListener("input", function(){
+      state.visitSearch = searchInput.value;
+      renderVisitsListArea();
+    });
+
+    var exportBtn = document.getElementById("exportBtn");
+    if(exportBtn) exportBtn.addEventListener("click", openExportSheet);
+
+    renderVisitsListArea();
+  }
+
+  function renderVisitsListArea(){
+    var container = document.getElementById("visitsListArea");
+    if(!container) return;
+    var query = (state.visitSearch||"").trim().toLowerCase();
+    var filtered = query
+      ? state.visits.filter(function(v){ return v.individual.toLowerCase().indexOf(query) !== -1; })
+      : state.visits;
+
+    if(filtered.length === 0){
+      container.innerHTML = '<div class="hint" style="text-align:center;padding:30px 0;margin:0;">No visits match "'+escapeHtml(state.visitSearch)+'".</div>';
+      return;
+    }
 
     var groups = {};
     var order = [];
-    state.visits.slice().sort(function(a,b){return b.arrival-a.arrival;}).forEach(function(v){
+    filtered.slice().sort(function(a,b){return b.arrival-a.arrival;}).forEach(function(v){
       var k = localDateKey(v.arrival);
       if(!groups[k]){ groups[k]=[]; order.push(k); }
       groups[k].push(v);
     });
 
+    var html = '';
     order.forEach(function(k){
       html += '<div class="section-label">'+groupLabel(k)+'</div>';
       html += '<div class="visit-list">';
@@ -1086,16 +1156,14 @@
       html += '</div>';
     });
 
-    content.innerHTML = html;
-    content.querySelectorAll(".visit-row").forEach(function(row){
+    container.innerHTML = html;
+    container.querySelectorAll(".visit-row").forEach(function(row){
       row.addEventListener("click", function(){
         var v = state.visits.find(function(x){return x.id===row.dataset.id;});
         if(v.status==="active"){ state.tab="checkin"; render(); }
         else openVisitDetail(v);
       });
     });
-    var exportBtn = document.getElementById("exportBtn");
-    if(exportBtn) exportBtn.addEventListener("click", openExportSheet);
   }
 
   function renderCheckinTab(){
@@ -1186,6 +1254,44 @@
     document.getElementById("endBtn").addEventListener("click", endVisit);
   }
 
+  function renderTrendsTab(){
+    navTitle.textContent = "Trends";
+    navSub.textContent = "Visits and hours by month";
+
+    if(state.visits.length === 0){
+      content.innerHTML = '<div class="empty-state"><p>No visits yet — trends show up here once you\'ve logged a few.</p></div>';
+      return;
+    }
+
+    var byMonth = {};
+    state.visits.forEach(function(v){
+      var mk = localDateKey(v.arrival).slice(0,7);
+      if(!byMonth[mk]) byMonth[mk] = { count:0, ms:0, individuals:{} };
+      byMonth[mk].count++;
+      if(v.departure) byMonth[mk].ms += (v.departure - v.arrival);
+      byMonth[mk].individuals[v.individual] = true;
+    });
+
+    var keys = Object.keys(byMonth).sort().reverse();
+    var html = "";
+    keys.forEach(function(k){
+      var m = byMonth[k];
+      var label = new Date(k+"-15T12:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
+      var indivCount = Object.keys(m.individuals).length;
+      var avgMs = m.count ? m.ms / m.count : 0;
+      html += '<div class="card" style="margin-bottom:12px;">'+
+        '<h4 style="margin-bottom:10px;">'+label+'</h4>'+
+        '<div class="stats-row" style="margin:0 0 8px;">'+
+          '<div class="stat-card"><div class="num">'+m.count+'</div><div class="lbl">Visits</div></div>'+
+          '<div class="stat-card"><div class="num">'+formatDuration(m.ms)+'</div><div class="lbl">Total time</div></div>'+
+        '</div>'+
+        '<div class="detail-row"><div class="k">Avg. visit</div><div class="v">'+(avgMs?formatDuration(avgMs):"—")+'</div></div>'+
+        '<div class="detail-row" style="border-bottom:none;"><div class="k">Different individuals</div><div class="v">'+indivCount+'</div></div>'+
+      '</div>';
+    });
+    content.innerHTML = html;
+  }
+
   function renderLibraryTab(){
     navTitle.textContent = "Library";
     navSub.textContent = "Customize your quick-entry lists";
@@ -1245,7 +1351,9 @@
           '<button data-edit-phrase="'+cat+'|'+idx+'" class="rm-btn">'+icon("edit")+'</button>'+
           '<button data-kind="phrases" data-idx="'+idx+'" data-cat="'+escapeAttr(cat)+'" class="rm-btn">'+icon("trash")+'</button></div>';
       }).join("");
-      html += '<div class="section-label" style="margin-top:14px;">'+escapeHtml(cat)+'</div>'+
+      html += '<div class="cat-header" style="margin-top:14px;"><div class="section-label" style="margin:0;flex:1;">'+escapeHtml(cat)+'</div>'+
+        '<button class="rm-btn" data-rename-cat="'+escapeAttr(cat)+'">'+icon("edit")+'</button>'+
+        '<button class="rm-btn" data-delete-cat="'+escapeAttr(cat)+'">'+icon("trash")+'</button></div>'+
         '<div class="visit-list" style="margin-bottom:8px;" data-reorder-list="phrase" data-reorder-cat="'+escapeAttr(cat)+'">'+(rows||'<div class="lib-row"><div class="txt" style="color:var(--muted);">Nothing here yet</div></div>')+'</div>'+
         '<div class="add-phrase-form">'+
           '<input class="field" id="addTitle-'+safeCat+'" placeholder="Short title (e.g. \u201cNeeds attention\u201d)">'+
@@ -1254,12 +1362,21 @@
         '</div>';
     });
     justAddedPhrase = null;
+    html += '<button class="btn btn-ghost btn-block" id="newCategoryBtn" style="margin-bottom:14px;">+ New category</button>';
 
     html += '<div class="section-label" style="margin-top:14px;">Backup &amp; Restore</div>'+
       '<div class="hint" style="margin-top:-4px;">The monthly export makes a document to keep. This makes a file that can put everything back — every visit, task, and phrase — on this phone or a new one.</div>'+
       '<button class="btn btn-primary btn-block" id="exportBackupBtn" style="margin-bottom:8px;">Export full backup</button>'+
       '<button class="btn btn-ghost btn-block" id="restoreBackupBtn">Restore from backup</button>'+
       '<input type="file" id="restoreFileInput" accept="application/json,.json" style="display:none;">';
+
+    var hasPin = !!getPinHash();
+    html += '<div class="section-label" style="margin-top:14px;">Security</div>'+
+      '<div class="hint" style="margin-top:-4px;">A basic on-device lock, not encryption — it stops a casual look if your phone\'s already unlocked, nothing stronger than that. Your phone\'s own passcode is the real protection.</div>'+
+      (hasPin
+        ? '<button class="btn btn-ghost btn-block" id="changePinBtn" style="margin-bottom:8px;">Change PIN</button>'+
+          '<button class="btn btn-danger btn-block" id="disablePinBtn">Turn off PIN lock</button>'
+        : '<button class="btn btn-primary btn-block" id="setupPinBtn">Set up PIN lock</button>');
 
     content.innerHTML = html;
 
@@ -1353,6 +1470,14 @@
       makeReorderable(el, function(oldIdx, newIdx){ reorderTemplateArray(state.templates.phrases[cat], oldIdx, newIdx); });
     });
 
+    content.querySelectorAll("[data-rename-cat]").forEach(function(btn){
+      btn.addEventListener("click", function(){ openRenameCategorySheet(btn.dataset.renameCat); });
+    });
+    content.querySelectorAll("[data-delete-cat]").forEach(function(btn){
+      btn.addEventListener("click", function(){ openDeleteCategorySheet(btn.dataset.deleteCat); });
+    });
+    document.getElementById("newCategoryBtn").addEventListener("click", openNewCategorySheet);
+
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
     var restoreInput = document.getElementById("restoreFileInput");
     document.getElementById("restoreBackupBtn").addEventListener("click", function(){ restoreInput.click(); });
@@ -1361,6 +1486,137 @@
         handleRestoreFile(restoreInput.files[0]);
       }
       restoreInput.value = "";
+    });
+
+    var setupBtn = document.getElementById("setupPinBtn");
+    if(setupBtn) setupBtn.addEventListener("click", function(){ openPinSheet("set"); });
+    var changeBtn = document.getElementById("changePinBtn");
+    if(changeBtn) changeBtn.addEventListener("click", function(){ openPinSheet("change"); });
+    var disableBtn = document.getElementById("disablePinBtn");
+    if(disableBtn) disableBtn.addEventListener("click", function(){ openPinSheet("disable"); });
+  }
+
+  function openRenameCategorySheet(oldName){
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>Rename category</h2>'+
+      '<div class="auth-error" id="catRenameError"></div>'+
+      '<input class="field" id="renameCatField" value="'+escapeAttr(oldName)+'" placeholder="Category name">'+
+      '<button class="btn btn-primary btn-block" id="saveRenameCatBtn">Save</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("saveRenameCatBtn").addEventListener("click", function(){
+      var newName = document.getElementById("renameCatField").value.trim();
+      var errEl = document.getElementById("catRenameError");
+      if(!newName){ errEl.textContent="Name can't be empty."; errEl.classList.add("show"); return; }
+      if(newName!==oldName && state.templates.phrases[newName]){ errEl.textContent="A category with that name already exists."; errEl.classList.add("show"); return; }
+      if(newName !== oldName){
+        state.templates.phrases[newName] = state.templates.phrases[oldName];
+        delete state.templates.phrases[oldName];
+        saveTemplates();
+      }
+      closeSheet();
+      render();
+    });
+  }
+
+  function openDeleteCategorySheet(name){
+    var count = (state.templates.phrases[name]||[]).length;
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>Delete "'+escapeHtml(name)+'"?</h2>'+
+      '<div class="hint" style="margin:10px 0 16px;">This removes the category and its '+count+' phrase'+(count===1?'':'s')+' from the quick-entry list. Notes already written on past visits aren\'t affected.</div>'+
+      '<button class="btn btn-danger btn-block" id="confirmDeleteCatBtn">Delete category</button>'+
+      '<button class="btn btn-ghost btn-block" id="cancelDeleteCatBtn" style="margin-top:8px;">Cancel</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("cancelDeleteCatBtn").addEventListener("click", closeSheet);
+    document.getElementById("confirmDeleteCatBtn").addEventListener("click", function(){
+      delete state.templates.phrases[name];
+      saveTemplates();
+      closeSheet();
+      render();
+    });
+  }
+
+  function openNewCategorySheet(){
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>New category</h2>'+
+      '<div class="hint" style="margin:10px 0 14px;">Give it a name and its first phrase to create it.</div>'+
+      '<div class="auth-error" id="newCatError"></div>'+
+      '<input class="field" id="newCatName" placeholder="Category name">'+
+      '<input class="field" id="newCatTitle" placeholder="Short title (e.g. \u201cNeeds attention\u201d)">'+
+      '<input class="field" id="newCatText" placeholder="Full phrase that goes in the note">'+
+      '<button class="btn btn-primary btn-block" id="createCatBtn">Create category</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("createCatBtn").addEventListener("click", function(){
+      var name = document.getElementById("newCatName").value.trim();
+      var title = document.getElementById("newCatTitle").value.trim();
+      var text = document.getElementById("newCatText").value.trim();
+      var errEl = document.getElementById("newCatError");
+      if(!name || !title || !text){ errEl.textContent="All three fields are needed to create a category."; errEl.classList.add("show"); return; }
+      if(state.templates.phrases[name]){ errEl.textContent="A category with that name already exists."; errEl.classList.add("show"); return; }
+      state.templates.phrases[name] = [{title:title, phrase:text}];
+      saveTemplates();
+      closeSheet();
+      render();
+    });
+  }
+
+  function openPinSheet(mode){
+    if(mode === "disable"){
+      sheetBody.innerHTML =
+        '<button class="close-x" id="closeSheetBtn">✕</button>'+
+        '<div class="sheet-handle"></div>'+
+        '<h2>Turn off PIN lock?</h2>'+
+        '<div class="hint" style="margin:10px 0 16px;">The app will open straight to your visits next time, with no PIN required.</div>'+
+        '<button class="btn btn-danger btn-block" id="confirmDisablePinBtn">Turn off PIN lock</button>'+
+        '<button class="btn btn-ghost btn-block" id="cancelPinBtn" style="margin-top:8px;">Cancel</button>';
+      sheetOverlay.classList.add("open");
+      document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+      document.getElementById("cancelPinBtn").addEventListener("click", closeSheet);
+      document.getElementById("confirmDisablePinBtn").addEventListener("click", function(){
+        clearPinHash();
+        closeSheet();
+        render();
+      });
+      return;
+    }
+
+    sheetBody.innerHTML =
+      '<button class="close-x" id="closeSheetBtn">✕</button>'+
+      '<div class="sheet-handle"></div>'+
+      '<h2>'+(mode==="change"?"Change PIN":"Set up PIN lock")+'</h2>'+
+      '<div class="hint" style="margin:10px 0 14px;">4 to 8 digits. Remember it — there\'s no recovery option, since nothing here is sent anywhere to reset it from.</div>'+
+      '<div class="auth-error" id="pinSetupError"></div>'+
+      '<input class="field" id="newPinField" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="New PIN">'+
+      '<input class="field" id="confirmPinField" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="Confirm PIN">'+
+      '<button class="btn btn-primary btn-block" id="savePinBtn">Save PIN</button>';
+    sheetOverlay.classList.add("open");
+    document.getElementById("closeSheetBtn").addEventListener("click", closeSheet);
+    document.getElementById("savePinBtn").addEventListener("click", async function(){
+      var p1 = document.getElementById("newPinField").value;
+      var p2 = document.getElementById("confirmPinField").value;
+      var errEl = document.getElementById("pinSetupError");
+      if(!/^\d{4,8}$/.test(p1)){
+        errEl.textContent = "PIN must be 4 to 8 digits.";
+        errEl.classList.add("show");
+        return;
+      }
+      if(p1 !== p2){
+        errEl.textContent = "Those don't match — try again.";
+        errEl.classList.add("show");
+        return;
+      }
+      var hash = await sha256Hex(p1);
+      savePinHash(hash);
+      closeSheet();
+      render();
     });
   }
 
@@ -1574,7 +1830,61 @@
     navbar.classList.toggle("scrolled", contentEl.scrollTop > 4);
   });
 
-  loadState();
+  // ---------- PIN lock ----------
+  // Worth being straight about what this is: a basic on-device deterrent,
+  // not encryption and not a real access-control system. It stops someone
+  // from casually opening this on your unlocked phone -- it does nothing
+  // against anyone with real access to the device's storage. Your phone's
+  // own passcode/Face ID is what's actually doing the heavy lifting; this
+  // is one more layer on top of that, not a replacement for it.
+  async function sha256Hex(text){
+    var enc = new TextEncoder().encode(text);
+    var buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  }
+  function getPinHash(){ try{ return localStorage.getItem("cv_pin_hash"); }catch(e){ return null; } }
+  function savePinHash(h){ try{ localStorage.setItem("cv_pin_hash", h); }catch(e){} }
+  function clearPinHash(){ try{ localStorage.removeItem("cv_pin_hash"); }catch(e){} }
+
+  function showLockScreen(){
+    document.getElementById("lockScreen").classList.add("open");
+    var input = document.getElementById("lockPinInput");
+    input.value = "";
+    setTimeout(function(){ input.focus(); }, 50);
+  }
+  function hideLockScreen(){
+    document.getElementById("lockScreen").classList.remove("open");
+  }
+
+  function initLockScreen(){
+    var input = document.getElementById("lockPinInput");
+    var errEl = document.getElementById("lockError");
+    var submitBtn = document.getElementById("lockSubmitBtn");
+    async function attemptUnlock(){
+      var entered = input.value;
+      if(!entered) return;
+      var hash = await sha256Hex(entered);
+      if(hash === getPinHash()){
+        errEl.classList.remove("show");
+        hideLockScreen();
+        loadState();
+      } else {
+        errEl.textContent = "Incorrect PIN — try again.";
+        errEl.classList.add("show");
+        input.value = "";
+        input.focus();
+      }
+    }
+    submitBtn.addEventListener("click", attemptUnlock);
+    input.addEventListener("keydown", function(e){ if(e.key==="Enter") attemptUnlock(); });
+  }
+
+  initLockScreen();
+  if(getPinHash()){
+    showLockScreen();
+  } else {
+    loadState();
+  }
 })();
 </script>
 </body>
